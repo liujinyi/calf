@@ -3,7 +3,7 @@ package com.calf.frame.log;
 /**
  * @author JinYi Liu
  */
-public class FileDebugLog implements Log {
+class FileDebugLog implements Log {
 
     private static FileDebugLog mLog;
 

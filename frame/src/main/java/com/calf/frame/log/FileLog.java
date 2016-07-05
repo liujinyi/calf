@@ -1,6 +1,7 @@
 package com.calf.frame.log;
 
 import android.os.Environment;
+import android.text.TextUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,32 +16,11 @@ import java.util.Locale;
  */
 class FileLog implements Log {
 
-    private static Log mLog;
+    private static FileLog mLog;
     private FileOutputStream mOutStream;
 
     private FileLog() {
-        File dir = Environment.getExternalStorageDirectory();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
-        String data = format.format(new Date());
-        File file = new File(dir, data + ".log");
-        if (!file.isAbsolute()) {
-            file = file.getAbsoluteFile();
-        }
-        try {
-            // 不把file的所有目录创建出来,会发生FileNotFoundException
-            if (file.exists()) {
-                mOutStream = new FileOutputStream(file, true);
-            } else {
-                if (file.getParentFile().mkdirs()) {
-                    boolean newFile = file.createNewFile();
-                    if (newFile) {
-                        mOutStream = new FileOutputStream(file, true);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            Logger.printStackTrace(e);
-        }
+        init(Environment.getExternalStorageDirectory());
     }
 
     @Override
@@ -75,9 +55,38 @@ class FileLog implements Log {
         print(tag, message);
     }
 
+    void setRootDir(String path) {
+        DebugAssert.classAssert(false,"FileLog [setRootDir] path is empty");
+        init(new File(path));
+    }
+
+    private void init(File dir) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
+        String data = format.format(new Date());
+        File file = new File(dir, data + ".log");
+        if (!file.isAbsolute()) {
+            file = file.getAbsoluteFile();
+        }
+        try {
+            // 不把file的所有目录创建出来,会发生FileNotFoundException
+            if (file.exists()) {
+                mOutStream = new FileOutputStream(file, true);
+            } else {
+                if (file.getParentFile().mkdirs()) {
+                    boolean newFile = file.createNewFile();
+                    if (newFile) {
+                        mOutStream = new FileOutputStream(file, true);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            Logger.printStackTrace(e);
+        }
+    }
+
     private void print(String tag, String message) {
         if (mOutStream == null) {
-            // 没有SD卡写入权限
+            // IO异常,譬如没有SD卡写入权限
             return;
         }
         StringBuilder sb = new StringBuilder();
@@ -99,7 +108,7 @@ class FileLog implements Log {
         }
     }
 
-    static Log getInstance() {
+    static FileLog getInstance() {
         if (mLog == null) {
             synchronized (FileLog.class) {
                 if (mLog == null) {

@@ -1,7 +1,5 @@
 package com.calf.frame.log;
 
-import android.text.TextUtils;
-
 /**
  * @author JinYi Liu
  */
@@ -10,18 +8,15 @@ public final class Logger {
     private static Type mType = Type.RELEASE;
     private static Log mLog = ReleaseLog.getInstance();
 
-    private static String mFileLogDir;
-
-    public static void init(String fileLogDir) {
-        DebugAssert.classAssert(!TextUtils.isEmpty(fileLogDir), "Logger fileLogDir is Empty");
-        Logger.mFileLogDir = fileLogDir;
-    }
-
     public static void changeLog(Type type) {
         if (type != null && type != mType) {
             mType = type;
             mLog = createLogByType(type);
         }
+    }
+
+    public static void setFileLogRootDir(String path) {
+        FileLog.getInstance().setRootDir(path);
     }
 
     public static void v(String tag, String message) {
