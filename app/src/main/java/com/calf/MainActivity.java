@@ -13,6 +13,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.calf.frame.http.HttpSession;
+import com.calf.frame.log.Logger;
+
+import java.io.IOException;
+
+import okhttp3.Response;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -41,6 +48,22 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        Logger.changeLog(Logger.Type.DEBUG);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpSession mSession = new HttpSession();
+                String url = "http://60.28.195.121:8180/ksingnew/index.htm";
+                Logger.i("xiaoniu", "11111111111111111");
+                Response response = mSession.get(url);
+                try {
+                    Logger.i("xiaoniu", "22222222222222222");
+                    Logger.e("xiaoniu", response.body().string());
+                } catch (IOException e) {
+                    Logger.printStackTrace(e);
+                }
+            }
+        }).start();
     }
 
     @Override
