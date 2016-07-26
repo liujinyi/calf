@@ -1,21 +1,33 @@
-package com.calf.frame.log;
+package com.calf.frame.tool;
 
 import android.os.Looper;
 
 /**
  * @author JinYi Liu
  */
-public final class DebugAssert {
+public final class Assert {
 
     private static boolean mDebug = false;
 
     public static void setDebug(boolean debug) {
-        DebugAssert.mDebug = debug;
+        Assert.mDebug = debug;
     }
 
     public static void classAssert(boolean flag, String message) {
         if (mDebug && !flag) {
             throw new AssertException(message);
+        }
+    }
+
+    public static void classAssert(boolean flag, Throwable throwable) {
+        if (mDebug && !flag) {
+            throw new AssertException(throwable);
+        }
+    }
+
+    public static void classAssert(boolean flag, String message, Throwable throwable) {
+        if (mDebug && !flag) {
+            throw new AssertException(message, throwable);
         }
     }
 
@@ -43,13 +55,13 @@ public final class DebugAssert {
             super(message);
         }
 
-//        private AssertException(Throwable throwable) {
-//            super(throwable);
-//        }
-//
-//        private AssertException(String message, Throwable throwable) {
-//            super(message, throwable);
-//        }
+        private AssertException(Throwable throwable) {
+            super(throwable);
+        }
+
+        private AssertException(String message, Throwable throwable) {
+            super(message, throwable);
+        }
 
     }
 

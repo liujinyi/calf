@@ -1,7 +1,8 @@
 package com.calf.frame.log;
 
 import android.os.Environment;
-import android.text.TextUtils;
+
+import com.calf.frame.tool.Assert;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,7 +57,7 @@ class FileLog implements Log {
     }
 
     void setRootDir(String path) {
-        DebugAssert.classAssert(false,"FileLog [setRootDir] path is empty");
+        Assert.classAssert(false,"FileLog [setRootDir] path is empty");
         init(new File(path));
     }
 

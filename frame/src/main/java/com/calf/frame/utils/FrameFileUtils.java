@@ -3,7 +3,7 @@ package com.calf.frame.utils;
 import android.os.Environment;
 import android.text.TextUtils;
 
-import com.calf.frame.log.DebugAssert;
+import com.calf.frame.tool.Assert;
 import com.calf.frame.log.Logger;
 
 import java.io.File;
@@ -88,7 +88,7 @@ public class FrameFileUtils {
     }
 
     public static boolean delete(File file) throws IOException {
-        DebugAssert.classAssert(file != null, CLASS_NAME + " [delete] file is null");
+        Assert.classAssert(file != null, CLASS_NAME + " [delete] file is null");
         boolean flag = false;
         if (file.exists()) {
             if (file.canWrite()) {

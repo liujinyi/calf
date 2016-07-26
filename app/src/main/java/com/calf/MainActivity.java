@@ -1,6 +1,7 @@
 package com.calf;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -13,15 +14,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.calf.frame.http.HttpSession;
 import com.calf.frame.log.Logger;
-
-import java.io.IOException;
-
-import okhttp3.Response;
+import com.calf.frame.message.MessageManager;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final String TAG = "xiaoniu";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,22 +47,45 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        Logger.changeLog(Logger.Type.DEBUG);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                HttpSession mSession = new HttpSession();
-                String url = "http://60.28.195.121:8180/ksingnew/index.htm";
-                Logger.i("xiaoniu", "11111111111111111");
-                Response response = mSession.get(url);
-                try {
-                    Logger.i("xiaoniu", "22222222222222222");
-                    Logger.e("xiaoniu", response.body().string());
-                } catch (IOException e) {
-                    Logger.printStackTrace(e);
-                }
+                Logger.e(TAG, "11111111111111111");
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        Logger.e("xiaoniu", "2222222222222222222");
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        Logger.e("xiaoniu", "33333333333333333333333");
+                    }
+                };
+                MessageManager.postDelayed(2000, runnable);
+                MessageManager.postDelayed(1000, new Runnable() {
+                    @Override
+                    public void run() {
+                        Logger.e("xiaoniu", "%%%%%%%%%%%%%%%%%%%");
+                        try {
+                            Thread.sleep(50);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        Logger.e("xiaoniu", "***************");
+                    }
+                });
+                MessageManager.removeCallbacks(runnable);
+                //MessageManager.removeAllCallbacks();
+                Logger.e("xiaoniu", "4444444444444444");
             }
         }).start();
+        long currentMills = System.currentTimeMillis();
+        long uptimeMillis = SystemClock.uptimeMillis();
+
+        Logger.e(TAG, "currentMills:" + currentMills);
+        Logger.e(TAG, "uptimeMillis:" + uptimeMillis);
     }
 
     @Override

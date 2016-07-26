@@ -3,7 +3,7 @@ package com.calf.frame.storage;
 import android.text.TextUtils;
 import android.util.Base64;
 
-import com.calf.frame.log.DebugAssert;
+import com.calf.frame.tool.Assert;
 import com.calf.frame.log.Logger;
 import com.calf.frame.utils.FrameDateUtils;
 import com.calf.frame.utils.FrameFileUtils;
@@ -49,7 +49,7 @@ public class CacheManager {
     public boolean put(String dir, long millis, String key, byte[] value) {
         boolean flag = false;
         if (TextUtils.isEmpty(dir) || TextUtils.isEmpty(key) || value == null) {
-            DebugAssert.classAssert(false, CLASS_NAME + " [put] parameter is Empty");
+            Assert.classAssert(false, CLASS_NAME + " [put] parameter is Empty");
             return flag;
         }
         BufferedOutputStream bos = null;
@@ -111,7 +111,7 @@ public class CacheManager {
     public byte[] get(String dir, String key, boolean useExpiredCache) {
         byte[] bytes = null;
         if (TextUtils.isEmpty(dir) || TextUtils.isEmpty(key)) {
-            DebugAssert.classAssert(false, CLASS_NAME + " [get] parameter is Empty");
+            Assert.classAssert(false, CLASS_NAME + " [get] parameter is Empty");
             return bytes;
         }
         String path = createCacheFilePath(dir, key);
@@ -194,7 +194,7 @@ public class CacheManager {
 
     public boolean isExist(String dir, String key) {
         if (TextUtils.isEmpty(dir) || TextUtils.isEmpty(key)) {
-            DebugAssert.classAssert(false, CLASS_NAME + " [isExist] parameter is Empty");
+            Assert.classAssert(false, CLASS_NAME + " [isExist] parameter is Empty");
             return false;
         }
         return new File(createCacheFilePath(dir, key)).exists();
@@ -203,7 +203,7 @@ public class CacheManager {
     public boolean isExpired(String dir, String key) {
         boolean flag = true;
         if (TextUtils.isEmpty(dir) || TextUtils.isEmpty(key)) {
-            DebugAssert.classAssert(false, CLASS_NAME + " [isExpired] parameter is Empty");
+            Assert.classAssert(false, CLASS_NAME + " [isExpired] parameter is Empty");
             return flag;
         }
         File file = new File(createCacheFilePath(dir, key));
