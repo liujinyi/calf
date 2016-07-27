@@ -47,45 +47,31 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        new Thread(new Runnable() {
+        testAsyncPostInMainThread();
+        Logger.e(TAG,"44444444444444444");
+    }
+
+    private void testAsyncPostInMainThread() {
+        Logger.e(TAG,"11111111111111111111");
+        MessageManager.asyncPost(new Runnable() {
             @Override
             public void run() {
-                Logger.e(TAG, "11111111111111111");
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        Logger.e("xiaoniu", "2222222222222222222");
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        Logger.e("xiaoniu", "33333333333333333333333");
-                    }
-                };
-                MessageManager.postDelayed(2000, runnable);
-                MessageManager.postDelayed(1000, new Runnable() {
-                    @Override
-                    public void run() {
-                        Logger.e("xiaoniu", "%%%%%%%%%%%%%%%%%%%");
-                        try {
-                            Thread.sleep(50);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        Logger.e("xiaoniu", "***************");
-                    }
-                });
-                MessageManager.removeCallbacks(runnable);
-                //MessageManager.removeAllCallbacks();
-                Logger.e("xiaoniu", "4444444444444444");
+                Logger.e(TAG,"6666666666666666666");
             }
-        }).start();
-        long currentMills = System.currentTimeMillis();
-        long uptimeMillis = SystemClock.uptimeMillis();
+        });
+        Logger.e(TAG,"22222222222222222222");
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Logger.e(TAG,"3333333333333333333");
+    }
 
-        Logger.e(TAG, "currentMills:" + currentMills);
-        Logger.e(TAG, "uptimeMillis:" + uptimeMillis);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Logger.e(TAG,"55555555555555555555");
     }
 
     @Override

@@ -44,23 +44,21 @@ public final class MessageManager {
         if (delayMillis < 0) {
             delayMillis = 0;
         }
-        return sendMessageAtTime(SystemClock.uptimeMillis() + delayMillis, r);
+        return sendMessageAtTime(SystemClock.uptimeMillis() + delayMillis, r, true);
     }
 
     /**
      * Runnable 中的代码会在主线程中执行,请不要执行耗时操作
-     *
-     * @param uptimeMillis 请使用SystemClock.uptimeMillis()
      */
-    public static boolean postAtTime(long uptimeMillis, Runnable r) {
-        return sendMessageAtTime(uptimeMillis, r);
+    public static boolean asyncPost(Runnable r) {
+        return sendMessageAtTime(SystemClock.uptimeMillis(), r, false);
     }
 
-    private static boolean sendMessageAtTime(long uptimeMillis, Runnable r) {
+    private static boolean sendMessageAtTime(long uptimeMillis, Runnable r, boolean sync) {
         checkHasInit();
         boolean flag = true;
         long start = SystemClock.uptimeMillis();
-        if (isMainThread() && uptimeMillis - SystemClock.uptimeMillis() == 0) {
+        if (isMainThread() && sync && uptimeMillis - SystemClock.uptimeMillis() == 0) {
             r.run();
         } else {
             Message message = Message.obtain(mHandler, r);
