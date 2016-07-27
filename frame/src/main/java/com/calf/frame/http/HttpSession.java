@@ -17,6 +17,8 @@ import okhttp3.Response;
  */
 public final class HttpSession {
 
+    static final String TAG = "HttpSession";
+
     private OkHttpClient mClient = new OkHttpClient.Builder()
             .addInterceptor(new LoggingInterceptor())
             .build();
