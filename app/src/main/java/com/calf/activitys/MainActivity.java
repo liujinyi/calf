@@ -1,77 +1,85 @@
-package com.calf;
+package com.calf.activitys;
 
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.Toast;
 
-import com.calf.frame.log.Logger;
-import com.calf.frame.message.MessageManager;
+import com.calf.R;
+import com.calf.adapters.MainActivityTabAdapter;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final String TAG = "xiaoniu";
+    public static final String TAG = "calf";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("");
+        toolbar.setBackgroundResource(R.color.red);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        testAsyncPostInMainThread();
-        Logger.e(TAG,"44444444444444444");
+        MainActivityTabAdapter mSectionsPagerAdapter = new MainActivityTabAdapter(getSupportFragmentManager());
+
+        // Set up the ViewPager with the sections adapter.
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
+
+        int count = tabLayout.getChildCount();
+//        tabLayout.getTabAt(0).setIcon(R.drawable.selector_tab_online);
+//        tabLayout.getTabAt(1).setIcon(R.drawable.selector_tab_local);
+//        tabLayout.getTabAt(2).setIcon(R.drawable.selector_tab_friend);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+
+        FrameLayout f0 = (FrameLayout) inflater.inflate(R.layout.item_main_tab, tabLayout, false);
+        ImageView imageView0 = (ImageView) f0.findViewById(R.id.icon);
+        imageView0.setImageResource(R.drawable.selector_tab_online);
+        tabLayout.getTabAt(0).setCustomView(imageView0);
+
+        FrameLayout f1 = (FrameLayout) inflater.inflate(R.layout.item_main_tab, tabLayout, false);
+        ImageView imageView1 = (ImageView) f1.findViewById(R.id.icon);
+        imageView1.setImageResource(R.drawable.selector_tab_local);
+        tabLayout.getTabAt(1).setCustomView(imageView1);
+
+        FrameLayout f2 = (FrameLayout) inflater.inflate(R.layout.item_main_tab, tabLayout, false);
+        ImageView imageView2 = (ImageView) f2.findViewById(R.id.icon);
+        imageView2.setImageResource(R.drawable.selector_tab_friend);
+        tabLayout.getTabAt(2).setCustomView(imageView2);
+
+
     }
 
-    private void testAsyncPostInMainThread() {
-        Logger.e(TAG,"11111111111111111111");
-        MessageManager.asyncPost(new Runnable() {
-            @Override
-            public void run() {
-                Logger.e(TAG,"6666666666666666666");
-            }
-        });
-        Logger.e(TAG,"22222222222222222222");
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        Logger.e(TAG,"3333333333333333333");
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Logger.e(TAG,"55555555555555555555");
     }
 
     @Override
@@ -87,7 +95,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.activity_main_menu, menu);
         return true;
     }
 
@@ -97,13 +105,15 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.action_settings) {
+//            Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
+//            return true;
+//        }
 
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

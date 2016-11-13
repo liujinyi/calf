@@ -15,6 +15,29 @@
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
+        <!--<item name="actionOverflowButtonStyle"></item>-->
+    </style>
+
+    <style name="Theme.ToolBar.Base" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColorPrimary">@color/black_424242</item>
+        <!--s设置Menu菜单的背景色-->
+        <item name="android:itemBackground">@color/blue_600</item>
+        <!--设置menu菜单不遮挡actionbar-->
+        <item name="actionOverflowMenuStyle">@style/OverflowMenu</item>
+        <!--配置Menu的图标-->
+        <item name="actionOverflowButtonStyle">@style/ToolBar.ActionButton.Overflow</item>
+    </style>
+
+    <style name="ToolBar.ActionButton.Overflow" parent="android:style/Widget.Holo.Light.ActionButton.Overflow">
+        <item name="android:src">@mipmap/ic_launcher</item>
+    </style>
+
+
+    <style name="OverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow">
+        <!--兼容Api 21之前的版本 -->
+        <item name="overlapAnchor">false</item>
+    </style>
 
 </resources>
