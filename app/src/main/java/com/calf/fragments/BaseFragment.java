@@ -10,4 +10,5 @@ public abstract class BaseFragment extends Fragment {
 
     public static final String ARG_SECTION_NUMBER = "section_number";
 
+
 }

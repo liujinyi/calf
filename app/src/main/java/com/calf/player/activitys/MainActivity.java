@@ -1,6 +1,6 @@
-package com.calf.activitys;
+package com.calf.player.activitys;
 
-import android.graphics.Color;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -18,14 +18,14 @@ import android.widget.Toast;
 
 import com.calf.R;
 import com.calf.adapters.MainActivityTabAdapter;
+import com.calf.frame.log.Logger;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    public static final String TAG = "calf";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Logger.i(TAG, mSimpleName + "[onCreate] ");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -37,7 +37,6 @@ public class MainActivity extends BaseActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -76,12 +75,6 @@ public class MainActivity extends BaseActivity
 
     }
 
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -112,7 +105,7 @@ public class MainActivity extends BaseActivity
 //            Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
 //            return true;
 //        }
-
+        startActivity(new Intent(MainActivity.this, SingleTopActivity.class));
         return true;
     }
 
@@ -139,5 +132,35 @@ public class MainActivity extends BaseActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        Logger.i(TAG, mSimpleName + "[onResume] ");
+        super.onResume();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        Logger.e(TAG, mSimpleName + "[onNewIntent] ");
+        super.onNewIntent(intent);
+    }
+
+    @Override
+    protected void onPause() {
+        Logger.i(TAG, mSimpleName + "[onPause] ");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Logger.i(TAG, mSimpleName + "[onStop] ");
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Logger.e(TAG, mSimpleName + "[onDestroy] ");
+        super.onDestroy();
     }
 }

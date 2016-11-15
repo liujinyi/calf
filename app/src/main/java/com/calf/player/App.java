@@ -1,4 +1,4 @@
-package com.calf;
+package com.calf.player;
 
 import android.app.Application;
 
