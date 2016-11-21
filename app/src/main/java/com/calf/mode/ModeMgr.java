@@ -18,11 +18,6 @@ public final class ModeMgr {
 
     }
 
-
-    public static MainFragmentManager getFragmentStackManager() {
-        return getMode(MainFragmentManager.class);
-    }
-
     public static <T extends Mode> T getMode(Class<T> cls) {
         return createManager(cls);
     }
