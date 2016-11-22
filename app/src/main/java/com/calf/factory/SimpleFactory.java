@@ -1,6 +1,6 @@
 package com.calf.factory;
 
-import com.calf.fragments.BaseFragment;
+import com.calf.fragments.base.BaseFragment;
 import com.calf.fragments.local.LocalMainFragment;
 import com.calf.fragments.online.OnlineMainFragment;
 import com.calf.fragments.search.SearchMainFragment;

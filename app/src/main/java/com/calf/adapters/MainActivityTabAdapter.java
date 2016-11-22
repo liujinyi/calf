@@ -5,9 +5,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.calf.factory.SimpleFactory;
-import com.calf.fragments.BaseFragment;
-
-import java.util.List;
 
 /**
  * Created by JinYi Liu on 16-11-12.

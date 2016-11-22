@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 import com.calf.R;
 import com.calf.adapters.MainActivityTabAdapter;
-import com.calf.fragments.BaseFragment;
+import com.calf.fragments.base.BaseFragment;
 import com.calf.fragments.BlankFragment;
 import com.calf.frame.log.Logger;
 import com.calf.player.manager.MainFragmentManager;

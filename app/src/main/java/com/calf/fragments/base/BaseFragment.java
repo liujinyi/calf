@@ -1,7 +1,6 @@
-package com.calf.fragments;
+package com.calf.fragments.base;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 import com.calf.frame.log.Logger;
@@ -27,7 +26,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
@@ -35,18 +34,12 @@ public abstract class BaseFragment extends Fragment {
         MainFragmentManager.closeFragment();
     }
 
-    /**
-     * 如果该Fragment在ViewPager里面,当Fragment可见的时候自动被回调
-     */
-    public void onVisibleInViewPager() {
-        Logger.w(TAG, getSimpleName() + " [onVisibleInViewPager]");
+    public void onFragmentVisible() {
+        Logger.w(TAG, getSimpleName() + " [onFragmentVisible]");
     }
 
-    /**
-     * 如果该Fragment在ViewPager里面,当Fragment不可见的时候自动被回调
-     */
-    public void onInVisibleInViewPager() {
-        Logger.w(TAG, getSimpleName() + " [onInVisibleInViewPager]");
+    public void onFragmentInVisible() {
+        Logger.w(TAG, getSimpleName() + " [onFragmentInVisible]");
     }
 
     public LaunchMode getLaunchMode() {
@@ -56,4 +49,5 @@ public abstract class BaseFragment extends Fragment {
     public enum LaunchMode {
         STANDARD, SINGLE
     }
+
 }

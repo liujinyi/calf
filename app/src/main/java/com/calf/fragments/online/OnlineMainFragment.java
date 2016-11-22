@@ -1,15 +1,13 @@
 package com.calf.fragments.online;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.calf.R;
-import com.calf.fragments.BaseFragment;
-import com.calf.fragments.search.SearchMainFragment;
+import com.calf.fragments.base.BaseFragment;
 
 /**
  * Created by JinYi Liu on 16-11-12.

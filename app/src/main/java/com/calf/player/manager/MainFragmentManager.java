@@ -4,7 +4,7 @@ import android.support.annotation.IdRes;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
-import com.calf.fragments.BaseFragment;
+import com.calf.fragments.base.BaseFragment;
 import com.calf.player.activitys.MainActivity;
 
 import java.util.Stack;
@@ -46,7 +46,7 @@ public class MainFragmentManager {
     private static void showFragment(String tag, @IdRes int container, BaseFragment f) {
         BaseFragment topFragment = getTopFragment();
         if (topFragment != null) {
-            topFragment.onInVisibleInViewPager();
+            topFragment.onFragmentInVisible();
         }
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
         transaction.add(container, f, tag);
@@ -60,7 +60,7 @@ public class MainFragmentManager {
         mFragmentManager.popBackStackImmediate();
         BaseFragment topFragment = getTopFragment();
         if (topFragment != null) {
-            topFragment.onVisibleInViewPager();
+            topFragment.onFragmentVisible();
         }
     }
 

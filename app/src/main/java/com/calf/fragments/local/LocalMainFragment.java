@@ -7,8 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.calf.R;
-import com.calf.fragments.BaseFragment;
-import com.calf.fragments.search.SearchMainFragment;
+import com.calf.fragments.base.BaseFragment;
 
 /**
  * Created by JinYi Liu on 16-11-12.
