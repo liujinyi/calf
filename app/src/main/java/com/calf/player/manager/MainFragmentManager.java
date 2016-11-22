@@ -31,7 +31,7 @@ public class MainFragmentManager {
 
     public static void showFragment(BaseFragment f) {
         String tag = null;
-        switch (f.getLaunchMode()) {
+        switch (f.giveMeLaunchMode()) {
             case SINGLE:
                 tag = f.getSimpleName();
                 navigateFragment(tag, f);

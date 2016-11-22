@@ -2,6 +2,9 @@ package com.calf.fragments.base;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.calf.frame.log.Logger;
 import com.calf.player.manager.MainFragmentManager;
@@ -16,7 +19,10 @@ public abstract class BaseFragment extends Fragment {
 
     private static final String TAG = "BaseFragment";
 
+    private boolean mInViewPager;
+    private boolean mVisibleToUser;
     private String mSimpleName;
+    private Behavior mBehavior;
 
     public final String getSimpleName() {
         if (mSimpleName == null) {
@@ -30,8 +36,30 @@ public abstract class BaseFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
+    public final void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+    }
+
     public void onBackPressed() {
         MainFragmentManager.closeFragment();
+    }
+
+    /**
+     * true : 在ViewPager中,Fragment会预加载 <br>
+     * false: 在ViewPager中,Fragment不会预加载
+     */
+    protected boolean isPreloadInViewPager() {
+        return false;
+    }
+
+    protected final boolean isFragmentAlive() {
+        return (getActivity() != null && !getActivity().isFinishing() && !isDetached());
     }
 
     public void onFragmentVisible() {
@@ -42,12 +70,29 @@ public abstract class BaseFragment extends Fragment {
         Logger.w(TAG, getSimpleName() + " [onFragmentInVisible]");
     }
 
-    public LaunchMode getLaunchMode() {
+    protected Behavior giveMeBehavior() {
+        return null;
+    }
+
+    public LaunchMode giveMeLaunchMode() {
         return LaunchMode.STANDARD;
     }
 
     public enum LaunchMode {
         STANDARD, SINGLE
     }
+
+    enum State {
+        SUCCESS, FAILURE, LOADING, NO_NET
+    }
+
+    public interface Behavior {
+
+        public void doInBackground();
+
+        public void refresh(State state);
+
+    }
+
 
 }
