@@ -18,15 +18,18 @@ import android.widget.Toast;
 
 import com.calf.R;
 import com.calf.adapters.MainActivityTabAdapter;
+import com.calf.fragments.BaseFragment;
+import com.calf.fragments.BlankFragment;
 import com.calf.frame.log.Logger;
+import com.calf.player.manager.MainFragmentManager;
 
-public class MainActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Logger.i(TAG, mSimpleName + "[onCreate] ");
         super.onCreate(savedInstanceState);
+        MainFragmentManager.init(this);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("");
@@ -72,6 +75,11 @@ public class MainActivity extends BaseActivity
         imageView2.setImageResource(R.drawable.selector_tab_friend);
         tabLayout.getTabAt(2).setCustomView(imageView2);
 
+        for (int i = 0; i < 6; i++) {
+            BlankFragment f = new BlankFragment();
+            f.mStr = "BlankFragment " + i;
+            MainFragmentManager.showFragment(f);
+        }
 
     }
 
@@ -81,7 +89,12 @@ public class MainActivity extends BaseActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            BaseFragment f = MainFragmentManager.getTopFragment();
+            if (f == null) {
+                super.onBackPressed();
+            } else {
+                f.onBackPressed();
+            }
         }
     }
 

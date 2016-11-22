@@ -1,15 +1,13 @@
 package com.calf.player.manager;
 
 import android.support.annotation.IdRes;
-import android.support.annotation.LayoutRes;
-import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.util.ArrayMap;
+import android.support.v4.app.FragmentTransaction;
 
 import com.calf.fragments.BaseFragment;
-import com.calf.frame.tool.Assert;
-import com.calf.mode.Mode;
 import com.calf.player.activitys.MainActivity;
+
+import java.util.Stack;
 
 /**
  * Created by JinYi Liu on 16-11-13.
@@ -18,68 +16,85 @@ import com.calf.player.activitys.MainActivity;
 public class MainFragmentManager {
 
     private static FragmentManager mFragmentManager;
-    private static ArrayMap<String, BaseFragment> mFragments = new ArrayMap<>();
+    private static Stack<BaseFragment> mStacks = new Stack<>();
 
     private MainFragmentManager() {
-    }
-
-    public static void showFragment(@NonNull BaseFragment f) {
-        showFragment(String.valueOf(f.hashCode()), 0, f);
-    }
-
-    public static void showFragment(String tag, @IdRes int container, @NonNull BaseFragment f) {
-
-    }
-
-    public static void closeFragment() {
-
-    }
-
-
-    public static BaseFragment getTopFragment() {
-
-        return null;
-    }
-
-    public static void navigateFragment(BaseFragment f) {
-        navigateFragment(f, false);
-    }
-
-    public static void navigateFragment(BaseFragment f, boolean flag) {
-        if (isExistFragment(f)) {
-            while (true) {
-                BaseFragment topFragment = getTopFragment();
-                String key = String.valueOf(topFragment);
-                if (topFragment == f) {
-                    if (flag) {
-                        mFragments.remove(key);
-                    }
-                    break;
-                } else {
-                    mFragments.remove(key);
-                }
-            }
-
-        }
-    }
-
-    public static boolean isExistFragment(BaseFragment f) {
-        return mFragments.containsKey(String.valueOf(f.hashCode()));
-    }
-
-    public static int getFragmentsSize() {
-        return mFragments.size();
     }
 
     public static void init(MainActivity activity) {
         if (mFragmentManager == null) {
             mFragmentManager = activity.getSupportFragmentManager();
         } else {
-            Assert.classAssert(false, "MainFragmentManager [init] has execute");
+            // Assert.classAssert(false, "MainFragmentManager [init] has execute");
         }
     }
 
-    private static void popFragment() {
-
+    public static void showFragment(BaseFragment f) {
+        String tag = null;
+        switch (f.getLaunchMode()) {
+            case SINGLE:
+                tag = f.getSimpleName();
+                navigateFragment(tag, f);
+                break;
+            default:
+                tag = String.valueOf(f.hashCode());
+                break;
+        }
+        showFragment(tag, android.R.id.content, f);
     }
+
+    private static void showFragment(String tag, @IdRes int container, BaseFragment f) {
+        BaseFragment topFragment = getTopFragment();
+        if (topFragment != null) {
+            topFragment.onInVisibleInViewPager();
+        }
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+        transaction.add(container, f, tag);
+        transaction.addToBackStack(tag);
+        transaction.commitAllowingStateLoss();
+        mStacks.push(f);
+    }
+
+    public static void closeFragment() {
+        mStacks.pop();
+        mFragmentManager.popBackStackImmediate();
+        BaseFragment topFragment = getTopFragment();
+        if (topFragment != null) {
+            topFragment.onVisibleInViewPager();
+        }
+    }
+
+    public static BaseFragment getTopFragment() {
+        if (mStacks.size() == 0) {
+            return null;
+        }
+        return mStacks.peek();
+    }
+
+    public static int getFragmentsSize() {
+        return mFragmentManager.getBackStackEntryCount();
+    }
+
+    private static void navigateFragment(String tag, BaseFragment f) {
+        if (isExist(tag)) {
+            while (true) {
+                BaseFragment topFragment = getTopFragment();
+                if (topFragment == null) {
+                    break;
+                }
+                mFragmentManager.popBackStackImmediate();
+                mStacks.pop();
+                if (topFragment.getClass() == f.getClass()) {
+                    break;
+                }
+            }
+
+        }
+    }
+
+    private static boolean isExist(String key) {
+        return mFragmentManager.findFragmentByTag(key) != null;
+    }
+
+
 }
