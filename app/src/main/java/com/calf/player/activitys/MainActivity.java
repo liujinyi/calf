@@ -11,8 +11,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import com.calf.R;
 import com.calf.adapters.MainActivityTabAdapter;
@@ -107,15 +105,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
-
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            Toast.makeText(getApplicationContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
-//            return true;
-//        }
-        startActivity(new Intent(MainActivity.this, SingleTopActivity.class));
-        return true;
+        switch (id) {
+            case R.id.action_search:
+                startActivity(new Intent(MainActivity.this, SingleTopActivity.class));
+                break;
+        }
+        return false;
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

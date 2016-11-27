@@ -3,6 +3,9 @@ package com.calf.fragments;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -30,6 +33,18 @@ public class BlankFragment extends BaseFragment {
         super.onSaveInstanceState(outState);
         outState.putString(getSimpleName(), "我是销毁后保持的字符串");
         Toast.makeText(getActivity(), "BlankFragment [onSaveInstanceState]", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.fragment_blank_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Toast.makeText(getContext(), toString(), Toast.LENGTH_SHORT).show();
+        return true;
     }
 
     @Override

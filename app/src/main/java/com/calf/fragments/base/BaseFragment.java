@@ -2,6 +2,7 @@ package com.calf.fragments.base;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -54,6 +55,7 @@ public abstract class BaseFragment<T> extends Fragment {
         super.onCreate(savedInstanceState);
         Logger.e(TAG, getSimpleName() + " [onCreate]");
         mBehavior = onBehaviorSetup();
+        setHasOptionsMenu(true);
         if (mBehavior != null) {
             mCallback = new Callback<T>() {
                 @Override
@@ -257,14 +259,15 @@ public abstract class BaseFragment<T> extends Fragment {
     protected ViewGroup onCreateTitleView(LayoutInflater inflater, ViewGroup container) {
         ViewGroup child = (ViewGroup) inflater.inflate(R.layout.layout_common_title, container, false);
         Toolbar toolbar = (Toolbar) child.findViewById(R.id.common_toolbar);
-        toolbar.setNavigationIcon(R.mipmap.ic_launcher);
+        toolbar.setNavigationIcon(R.drawable.selector_common_back);
+        onToolBarSetup(toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
             }
         });
-        onToolBarSetup(toolbar);
         return child;
     }
 
