@@ -1,5 +1,10 @@
 package com.calf.factory;
 
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.calf.R;
 import com.calf.fragments.base.BaseFragment;
 import com.calf.fragments.mine.MineMainFragment;
 import com.calf.fragments.online.OnlineMainFragment;
@@ -28,5 +33,12 @@ public class SimpleFactory {
                 break;
         }
         return f;
+    }
+
+    public static ViewGroup createStateView(LayoutInflater inflater, ViewGroup container, String content) {
+        ViewGroup child = (ViewGroup) inflater.inflate(R.layout.layout_common_state, container, false);
+        TextView textView = (TextView) child.findViewById(R.id.tv_common_content);
+        textView.setText(content);
+        return child;
     }
 }

@@ -9,9 +9,10 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.FrameLayout;
 
 import com.calf.R;
+import com.calf.factory.SimpleFactory;
 import com.calf.frame.log.Logger;
 import com.calf.frame.message.MessageManager;
 import com.calf.player.manager.MainFragmentManager;
@@ -27,7 +28,6 @@ public abstract class BaseFragment<T> extends Fragment {
     public static final int STATE_FAILURE = 1003;
     public static final int STATE_LOADING = 1004;
     public static final int STATE_SUCCESS = 1005;
-    public static final int STATE_PRELOAD = 1006;
 
     private static final String TAG = "BaseFragment";
     private static final String MESSAGE_PRELOAD_VIEW = "viewpager preload view create";
@@ -48,8 +48,8 @@ public abstract class BaseFragment<T> extends Fragment {
     private Bundle mSavedInstanceState;
 
     private ViewGroup mRootContainer;
-    private ViewGroup mTitleContainer;
-    private ViewGroup mContentContainer;
+    private FrameLayout mTitleContainer;
+    private FrameLayout mContentContainer;
 
     protected abstract ViewGroup onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, T t);
 
@@ -103,7 +103,6 @@ public abstract class BaseFragment<T> extends Fragment {
         }
         mVisibleToUser = isVisibleToUser;
         if (!mHasOnCreateView) {
-            //Logger.e(TAG, getSimpleName() + " [setUserVisibleHint] mHasOnCreateView is false");
             return;
         }
         if (isVisibleToUser && !mHasOnCreateContentView) {
@@ -120,8 +119,8 @@ public abstract class BaseFragment<T> extends Fragment {
         Logger.w(TAG, getSimpleName() + " [onCreateView]");
         this.mSavedInstanceState = savedInstanceState;
         this.mRootContainer = (ViewGroup) inflater.inflate(R.layout.fragment_base, container, false);
-        this.mTitleContainer = (ViewGroup) mRootContainer.findViewById(R.id.title_container);
-        this.mContentContainer = (ViewGroup) mRootContainer.findViewById(R.id.content_container);
+        this.mTitleContainer = (FrameLayout) mRootContainer.findViewById(R.id.title_container);
+        this.mContentContainer = (FrameLayout) mRootContainer.findViewById(R.id.content_container);
         if (isShowTitleContainer()) {
             ViewGroup titleContainer = onCreateTitleView(inflater, mTitleContainer);
             if (titleContainer != null) {
@@ -164,7 +163,7 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     public final void setInitState(int state) {
-        if (state >= STATE_EMPTY && state <= STATE_PRELOAD) {
+        if (state >= STATE_EMPTY && state <= STATE_SUCCESS) {
             this.mInitState = state;
         }
     }
@@ -189,12 +188,12 @@ public abstract class BaseFragment<T> extends Fragment {
         return LayoutInflater.from(getActivity());
     }
 
-    protected final ViewGroup getContentContainer() {
+    protected final FrameLayout getContentContainer() {
         return mContentContainer;
     }
 
     protected final void showEmptyView() {
-        if (mHasOnCreateContentView) {
+        if (isFragmentAlive() && mHasOnCreateContentView) {
             int count = mContentContainer.getChildCount();
             if (count == 1) {
                 mContentContainer.addView(mBehavior.onCreateStateView(STATE_EMPTY));
@@ -203,7 +202,7 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     protected final void removeEmptyView() {
-        if (mHasOnCreateContentView) {
+        if (isFragmentAlive() && mHasOnCreateContentView) {
             int count = mContentContainer.getChildCount();
             if (count == 2) {
                 mContentContainer.removeViewAt(count - 1);
@@ -214,9 +213,7 @@ public abstract class BaseFragment<T> extends Fragment {
     protected ViewGroup onCreatePreloadView(LayoutInflater inflater, ViewGroup container) {
         ViewGroup child = null;
         if (mBehavior == null) {
-            child = (ViewGroup) inflater.inflate(R.layout.layout_common_state, container, false);
-            TextView textView = (TextView) child.findViewById(R.id.tv_common_content);
-            textView.setText("正在加载中...");
+            child = SimpleFactory.createStateView(inflater, container, StateViewFactory.DEFAULT_EMPTY_CONTENT);
         } else {
             child = mBehavior.onCreateStateView(STATE_LOADING);
         }
@@ -231,10 +228,18 @@ public abstract class BaseFragment<T> extends Fragment {
 
     }
 
+    protected void beforeOnCreateContentView() {
+
+    }
+
     protected void afterOnCreateStateView(int state, String message) {
         if (state == STATE_FAILURE) {
             Logger.e(TAG, getSimpleName() + " failure message:" + message);
         }
+    }
+
+    protected void afterOnCreateContentView(T t) {
+
     }
 
     protected ViewGroup onCreateTitleView(LayoutInflater inflater, ViewGroup container) {
@@ -253,6 +258,27 @@ public abstract class BaseFragment<T> extends Fragment {
         return child;
     }
 
+    private void addContentView(ViewGroup child) {
+        if (mContentContainer.getChildCount() > 0) {
+            mContentContainer.removeAllViews();
+        }
+        mContentContainer.addView(child);
+    }
+
+    private void showPreloadView(final int state, final String message) {
+        MessageManager.post(new Runnable() {
+            @Override
+            public void run() {
+                if (isFragmentAlive() && !mHasOnCreateContentView && state != mCurrentState) {
+                    beforeOnCreateStateView(state);
+                    addContentView(onCreatePreloadView(getLayoutInflater(), mContentContainer));
+                    mCurrentState = state;
+                    afterOnCreateStateView(state, message);
+                }
+            }
+        });
+    }
+
     private void showStateView(final int state, final Behavior behavior, final String message) {
         MessageManager.post(new Runnable() {
             @Override
@@ -260,15 +286,7 @@ public abstract class BaseFragment<T> extends Fragment {
                 if (isFragmentAlive() && !mHasOnCreateContentView && state != mCurrentState) {
                     ViewGroup child = null;
                     beforeOnCreateStateView(state);
-                    if (state == STATE_PRELOAD) {
-                        child = onCreatePreloadView(getLayoutInflater(), mContentContainer);
-                    } else {
-                        child = behavior.onCreateStateView(state);
-                    }
-                    if (mContentContainer.getChildCount() > 0) {
-                        mContentContainer.removeAllViews();
-                    }
-                    mContentContainer.addView(child);
+                    addContentView(behavior.onCreateStateView(state));
                     mCurrentState = state;
                     afterOnCreateStateView(state, message);
                 }
@@ -281,11 +299,10 @@ public abstract class BaseFragment<T> extends Fragment {
             @Override
             public void run() {
                 if (isFragmentAlive() && !mHasOnCreateContentView) {
-                    if (mContentContainer.getChildCount() > 0) {
-                        mContentContainer.removeAllViews();
-                    }
-                    mContentContainer.addView(onCreateContentView(getLayoutInflater(), mContentContainer, savedInstanceState, t));
+                    beforeOnCreateContentView();
+                    addContentView(onCreateContentView(getLayoutInflater(), mContentContainer, savedInstanceState, t));
                     mHasOnCreateContentView = true;
+                    afterOnCreateContentView(t);
                 }
             }
         });
@@ -296,7 +313,7 @@ public abstract class BaseFragment<T> extends Fragment {
             return;
         }
         if (mInViewPager && !isPreloadInViewPager() && !mVisibleToUser) {
-            showStateView(STATE_PRELOAD, null, MESSAGE_PRELOAD_VIEW);
+            showPreloadView(STATE_LOADING, MESSAGE_PRELOAD_VIEW);
         } else {
             if (mRestoreFragment && t != null) {
                 showContentView(savedInstanceState, t);
@@ -327,25 +344,25 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
 
-    public interface Behavior<T> {
+    protected interface Behavior<T> {
 
-        public ViewGroup onCreateStateView(int state);
+        ViewGroup onCreateStateView(int state);
 
-        public void doInBackground(Bundle savedInstanceState);
+        void doInBackground(Bundle savedInstanceState);
 
-        public void initBehavior(LayoutInflater inflater, ViewGroup container, Callback<T> callback);
-
-    }
-
-    public interface Callback<T> {
-
-        public void onState(int state, String message);
-
-        public void onSuccess(T t, Bundle savedInstanceState);
+        void initBehavior(LayoutInflater inflater, ViewGroup container, Callback<T> callback);
 
     }
 
-    public abstract class LocalBehavior implements Behavior<T> {
+    interface Callback<T> {
+
+        void onState(int state, String message);
+
+        void onSuccess(T t, Bundle savedInstanceState);
+
+    }
+
+    protected abstract class LocalBehavior implements Behavior<T> {
 
         private ViewGroup mContainer;
         private Callback<T> mCallback;
@@ -382,12 +399,6 @@ public abstract class BaseFragment<T> extends Fragment {
         }
 
         public abstract T onBackgroundLoading() throws Exception;
-
-        public final void setFactory(LocalStateViewFactory factory) {
-            if (factory != null) {
-                this.mFactory = factory;
-            }
-        }
 
         private LocalStateViewFactory getFactory() {
             if (mFactory == null) {
@@ -439,32 +450,37 @@ public abstract class BaseFragment<T> extends Fragment {
         }
     }
 
-    public abstract class OnlineBehavior<T> implements Behavior<T> {
+    protected abstract class OnlineBehavior<T> implements Behavior<T> {
 
         public abstract String giveMeUrl();
 
         public abstract T onBackgroundParser(String data);
     }
 
-    public interface OnRetryListener {
-        public void onRetry();
+    protected interface OnRetryListener {
+        void onRetry();
     }
 
-    public interface StateViewFactory {
+    interface StateViewFactory {
 
-        public ViewGroup onCreateEmptyView(LayoutInflater inflater, ViewGroup container);
+        String DEFAULT_EMPTY_CONTENT = "暂无内容";
+        String DEFAULT_LOADING_CONTENT = "正在加载中...";
+        String DEFAULT_FAILURE_CONTENT = "加载失败,点击屏幕重试!";
+        String DEFAULT_NO_NET_CONTENT = "无可用网络连接,点击屏幕重试!";
 
-        public ViewGroup onCreateLoadingView(LayoutInflater inflater, ViewGroup container);
+        ViewGroup onCreateEmptyView(LayoutInflater inflater, ViewGroup container);
 
-        public ViewGroup onCreateFailureView(LayoutInflater inflater, ViewGroup container);
+        ViewGroup onCreateLoadingView(LayoutInflater inflater, ViewGroup container);
+
+        ViewGroup onCreateFailureView(LayoutInflater inflater, ViewGroup container);
     }
 
-    public static class LocalStateViewFactory implements StateViewFactory {
+    static class LocalStateViewFactory implements StateViewFactory {
 
+        private String mEmptyContent;
+        private String mFailureContent;
+        private String mLoadingContent;
         private OnRetryListener mListener;
-        private String mEmptyContent = "暂无内容";
-        private String mFailureContent = "加载失败,点击屏幕重试!";
-        private String mLoadingContent = "正在加载中...";
 
         public LocalStateViewFactory(OnRetryListener listener) {
             this.mListener = listener;
@@ -492,39 +508,19 @@ public abstract class BaseFragment<T> extends Fragment {
             return mListener;
         }
 
-        public final String getLoadingContent() {
-            return mLoadingContent;
-        }
-
-        public final String getFailureContent() {
-            return mFailureContent;
-        }
-
-        public final String getEmptyContent() {
-            return mEmptyContent;
-        }
-
         @Override
         public ViewGroup onCreateEmptyView(LayoutInflater inflater, ViewGroup container) {
-            ViewGroup child = (ViewGroup) inflater.inflate(R.layout.layout_common_state, container, false);
-            TextView textView = (TextView) child.findViewById(R.id.tv_common_content);
-            textView.setText(getEmptyContent());
-            return child;
+            return SimpleFactory.createStateView(inflater, container, TextUtils.isEmpty(mEmptyContent) ? DEFAULT_EMPTY_CONTENT : mEmptyContent);
         }
 
         @Override
         public ViewGroup onCreateLoadingView(LayoutInflater inflater, ViewGroup container) {
-            ViewGroup child = (ViewGroup) inflater.inflate(R.layout.layout_common_state, container, false);
-            TextView textView = (TextView) child.findViewById(R.id.tv_common_content);
-            textView.setText(getLoadingContent());
-            return child;
+            return SimpleFactory.createStateView(inflater, container, TextUtils.isEmpty(mLoadingContent) ? DEFAULT_LOADING_CONTENT : mLoadingContent);
         }
 
         @Override
         public ViewGroup onCreateFailureView(LayoutInflater inflater, ViewGroup container) {
-            ViewGroup child = (ViewGroup) inflater.inflate(R.layout.layout_common_state, container, false);
-            TextView textView = (TextView) child.findViewById(R.id.tv_common_content);
-            textView.setText(getFailureContent());
+            ViewGroup child = SimpleFactory.createStateView(inflater, container, TextUtils.isEmpty(mFailureContent) ? DEFAULT_FAILURE_CONTENT : mFailureContent);
             child.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -532,6 +528,26 @@ public abstract class BaseFragment<T> extends Fragment {
                 }
             });
             return child;
+        }
+
+    }
+
+    static class OnlineStateViewFactory extends LocalStateViewFactory {
+
+        private String mNoNetContent;
+
+        public OnlineStateViewFactory(OnRetryListener listener) {
+            super(listener);
+        }
+
+        public final void setNoNetContent(String content) {
+            if (!TextUtils.isEmpty(content)) {
+                this.mNoNetContent = content;
+            }
+        }
+
+        public ViewGroup onCreateNoNetView(LayoutInflater inflater, ViewGroup container) {
+            return SimpleFactory.createStateView(inflater, container, TextUtils.isEmpty(mNoNetContent) ? DEFAULT_NO_NET_CONTENT : mNoNetContent);
         }
 
     }

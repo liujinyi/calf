@@ -58,13 +58,24 @@ public class TestFragmentNoBehavior extends BaseFragment<String> {
             @Override
             public String onBackgroundLoading() throws Exception {
                 Thread.sleep(1000);
-                Object o = null;
-                o.equals("");
                 return "我是流氓我是谁";
             }
         };
+        behavior.getListener().onRetry();
         behavior.setLoadingContent("自定义Loading....");
         return behavior;
     }
 
+    @Override
+    protected void afterOnCreateContentView(String s) {
+//        // ... do some thing
+//        showEmptyView();
+//
+//        MessageManager.postDelayed(3000, new Runnable() {
+//            @Override
+//            public void run() {
+//                removeEmptyView();
+//            }
+//        });
+    }
 }
