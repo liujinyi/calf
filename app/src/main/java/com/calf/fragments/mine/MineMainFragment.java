@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.calf.R;
-import com.calf.fragments.BlankFragment;
+import com.calf.fragments.TestFragmentNoBehavior;
 import com.calf.fragments.base.BaseFragment;
 import com.calf.player.manager.MainFragmentManager;
 
@@ -42,7 +42,7 @@ public class MineMainFragment extends BaseFragment<String> {
         child.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainFragmentManager.showFragment(BlankFragment.newInstance(toString()));
+                MainFragmentManager.showFragment(new TestFragmentNoBehavior());
             }
         });
         return child;

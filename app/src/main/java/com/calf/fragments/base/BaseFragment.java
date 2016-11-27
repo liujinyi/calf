@@ -31,8 +31,9 @@ public abstract class BaseFragment<T> extends Fragment {
 
     private static final String TAG = "BaseFragment";
     private static final String MESSAGE_PRELOAD_VIEW = "viewpager preload view create";
-    private static final String MESSAGE_SET_CURRENT_STATE = "user call setCurrentState method";
+    private static final String MESSAGE_SET_CURRENT_STATE = "user call setInitState method";
 
+    private int mInitState;
     private int mCurrentState;
     private String mSimpleName;
     private boolean mInViewPager;
@@ -163,9 +164,9 @@ public abstract class BaseFragment<T> extends Fragment {
         return (getActivity() != null && !getActivity().isFinishing() && !isDetached());
     }
 
-    public final void setCurrentState(int state) {
+    public final void setInitState(int state) {
         if (state >= STATE_EMPTY && state <= STATE_PRELOAD) {
-            this.mCurrentState = state;
+            this.mInitState = state;
         }
     }
 
@@ -235,7 +236,7 @@ public abstract class BaseFragment<T> extends Fragment {
         if (state == STATE_FAILURE) {
             Logger.e(TAG, getSimpleName() + " failure message:" + message);
         } else {
-            //Logger.e(TAG, getSimpleName() + " [afterOnCreateStateView] state :" + state);
+            Logger.e(TAG, getSimpleName() + " [afterOnCreateStateView] state :" + state + ":::" + message);
         }
     }
 
@@ -307,10 +308,10 @@ public abstract class BaseFragment<T> extends Fragment {
             if (mBehavior == null) {
                 showContentView(savedInstanceState, null);
             } else {
-                switch (mCurrentState) {
+                switch (mInitState) {
                     case STATE_EMPTY:
                     case STATE_FAILURE:
-                        showStateView(mCurrentState, mBehavior, MESSAGE_SET_CURRENT_STATE);
+                        showStateView(mInitState, mBehavior, MESSAGE_SET_CURRENT_STATE);
                         break;
                     case STATE_SUCCESS:
                         showContentView(savedInstanceState, null);
@@ -440,11 +441,11 @@ public abstract class BaseFragment<T> extends Fragment {
         }
     }
 
-    public interface OnlineBehavior<T> extends Behavior<T> {
+    public abstract class OnlineBehavior<T> implements Behavior<T> {
 
-        public String giveMeUrl();
+        public abstract String giveMeUrl();
 
-        public T onBackgroundParser(String data);
+        public abstract T onBackgroundParser(String data);
     }
 
     public interface OnRetryListener {
@@ -460,7 +461,7 @@ public abstract class BaseFragment<T> extends Fragment {
         public ViewGroup onCreateFailureView(LayoutInflater inflater, ViewGroup container);
     }
 
-    public class LocalStateViewFactory implements StateViewFactory {
+    public static class LocalStateViewFactory implements StateViewFactory {
 
         private OnRetryListener mListener;
         private String mEmptyContent = "暂无内容";
@@ -536,4 +537,5 @@ public abstract class BaseFragment<T> extends Fragment {
         }
 
     }
+
 }
