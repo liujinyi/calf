@@ -55,7 +55,7 @@ public class MainFragmentManager {
             topFragment.onFragmentInVisible();
         }
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
-        transaction.replace(container, f, tag);
+        transaction.add(container, f, tag);
         transaction.addToBackStack(tag);
         transaction.commitAllowingStateLoss();
         mStacks.push(f);

@@ -14,6 +14,7 @@ import com.calf.fragments.base.BaseFragment;
  */
 
 public class RecommendFragment extends BaseFragment<OnlineInfo> {
+
     @Override
     protected ViewGroup onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, OnlineInfo o) {
         ViewGroup child = (ViewGroup) inflater.inflate(R.layout.fragment_recommend, container, false);

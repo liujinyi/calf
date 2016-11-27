@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ public abstract class BaseFragment<T> extends Fragment {
     public static final int STATE_FAILURE = 1003;
     public static final int STATE_LOADING = 1004;
     public static final int STATE_SUCCESS = 1005;
+    public static final int STATE_PRELOAD = 1006;
 
     private static final String TAG = "BaseFragment";
     private static final String MESSAGE_PRELOAD_VIEW = "viewpager preload view create";
@@ -53,36 +55,20 @@ public abstract class BaseFragment<T> extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Logger.e(TAG, getSimpleName() + " [onCreate]");
+        Logger.e(TAG, getSimpleName() + " [onCreate] " + hashCode());
         mBehavior = onBehaviorSetup();
         setHasOptionsMenu(true);
         if (mBehavior != null) {
             mCallback = new Callback<T>() {
                 @Override
-                public void onState(final int state, final ViewGroup child, final String message) {
-                    if (isFragmentAlive()) {
-                        MessageManager.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                beforeOnCreateStateView(state);
-                                showStateView(state, child);
-                                afterOnCreateStateView(state, message);
-                            }
-                        });
-                    }
+                public void onState(final int state, final String message) {
+                    showStateView(state, mBehavior, message);
                 }
 
                 @Override
                 public void onSuccess(final T t, final Bundle savedInstanceState) {
                     BaseFragment.this.t = t;
-                    if (isFragmentAlive()) {
-                        MessageManager.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                showContentView(onCreateContentView(getLayoutInflater(), mContentContainer, savedInstanceState, t));
-                            }
-                        });
-                    }
+                    showContentView(savedInstanceState, t);
                 }
             };
         }
@@ -95,13 +81,18 @@ public abstract class BaseFragment<T> extends Fragment {
         mRestoreFragment = true;
         mHasOnCreateView = false;
         mHasOnCreateContentView = false;
-        Logger.w(TAG, getSimpleName() + " [onDestroyView]");
+        Logger.w(TAG, getSimpleName() + " [onDestroyView] " + hashCode());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return true;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Logger.e(TAG, getSimpleName() + " [onDestroy]");
+        Logger.e(TAG, getSimpleName() + " [onDestroy] " + hashCode());
     }
 
     @Override
@@ -173,7 +164,7 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     public final void setCurrentState(int state) {
-        if (state >= STATE_EMPTY && state <= STATE_SUCCESS) {
+        if (state >= STATE_EMPTY && state <= STATE_PRELOAD) {
             this.mCurrentState = state;
         }
     }
@@ -191,15 +182,7 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     protected boolean isShowTitleContainer() {
-        boolean flag = false;
-        Fragment parent = getParentFragment();
-        if (parent == null) {
-            Logger.e(TAG, getSimpleName() + " [isShowTitleContainer] parent fragment is null");
-            flag = true;
-        } else {
-            Logger.e(TAG, getSimpleName() + " [isShowTitleContainer] parent fragment is :" + parent.toString());
-        }
-        return flag;
+        return getParentFragment() == null;
     }
 
     protected final LayoutInflater getLayoutInflater() {
@@ -271,24 +254,42 @@ public abstract class BaseFragment<T> extends Fragment {
         return child;
     }
 
-    private void showStateView(int state, ViewGroup child) {
-        if (!mHasOnCreateContentView && state != mCurrentState) {
-            if (mContentContainer.getChildCount() > 0) {
-                mContentContainer.removeAllViews();
+    private void showStateView(final int state, final Behavior behavior, final String message) {
+        MessageManager.post(new Runnable() {
+            @Override
+            public void run() {
+                if (isFragmentAlive() && !mHasOnCreateContentView && state != mCurrentState) {
+                    ViewGroup child = null;
+                    beforeOnCreateStateView(state);
+                    if (state == STATE_PRELOAD) {
+                        child = onCreatePreloadView(getLayoutInflater(), mContentContainer);
+                    } else {
+                        child = behavior.onCreateStateView(state);
+                    }
+                    if (mContentContainer.getChildCount() > 0) {
+                        mContentContainer.removeAllViews();
+                    }
+                    mContentContainer.addView(child);
+                    mCurrentState = state;
+                    afterOnCreateStateView(state, message);
+                }
             }
-            mContentContainer.addView(child);
-            mCurrentState = state;
-        }
+        });
     }
 
-    private void showContentView(ViewGroup child) {
-        if (!mHasOnCreateContentView) {
-            if (mContentContainer.getChildCount() > 0) {
-                mContentContainer.removeAllViews();
+    private void showContentView(final Bundle savedInstanceState, final T t) {
+        MessageManager.post(new Runnable() {
+            @Override
+            public void run() {
+                if (isFragmentAlive() && !mHasOnCreateContentView) {
+                    if (mContentContainer.getChildCount() > 0) {
+                        mContentContainer.removeAllViews();
+                    }
+                    mContentContainer.addView(onCreateContentView(getLayoutInflater(), mContentContainer, savedInstanceState, t));
+                    mHasOnCreateContentView = true;
+                }
             }
-            mContentContainer.addView(child);
-            mHasOnCreateContentView = true;
-        }
+        });
     }
 
     private void handlerPreloadInViewPager(Bundle savedInstanceState) {
@@ -296,27 +297,23 @@ public abstract class BaseFragment<T> extends Fragment {
             return;
         }
         if (mInViewPager && !isPreloadInViewPager() && !mVisibleToUser) {
-            beforeOnCreateStateView(mCurrentState);
-            showStateView(STATE_LOADING, onCreatePreloadView(getLayoutInflater(), mContentContainer));
-            afterOnCreateStateView(mCurrentState, MESSAGE_PRELOAD_VIEW);
+            showStateView(STATE_LOADING, null, MESSAGE_PRELOAD_VIEW);
         } else {
             if (mRestoreFragment && t != null) {
-                showContentView(onCreateContentView(getLayoutInflater(), mContentContainer, savedInstanceState, t));
+                showContentView(savedInstanceState, t);
                 mRestoreFragment = false;
                 return;
             }
             if (mBehavior == null) {
-                showContentView(onCreateContentView(getLayoutInflater(), mContentContainer, savedInstanceState, null));
+                showContentView(savedInstanceState, null);
             } else {
                 switch (mCurrentState) {
                     case STATE_EMPTY:
                     case STATE_FAILURE:
-                        beforeOnCreateStateView(mCurrentState);
-                        showStateView(mCurrentState, mBehavior.onCreateStateView(mCurrentState));
-                        afterOnCreateStateView(mCurrentState, MESSAGE_SET_CURRENT_STATE);
+                        showStateView(mCurrentState, mBehavior, MESSAGE_SET_CURRENT_STATE);
                         break;
                     case STATE_SUCCESS:
-                        showContentView(onCreateContentView(getLayoutInflater(), mContentContainer, savedInstanceState, null));
+                        showContentView(savedInstanceState, null);
                         break;
                     default:
                         mBehavior.doInBackground(savedInstanceState);
@@ -343,9 +340,9 @@ public abstract class BaseFragment<T> extends Fragment {
 
     public interface Callback<T> {
 
-        public void onSuccess(T t, Bundle savedInstanceState);
+        public void onState(int state, String message);
 
-        public void onState(int state, ViewGroup child, String message);
+        public void onSuccess(T t, Bundle savedInstanceState);
 
     }
 
@@ -417,11 +414,11 @@ public abstract class BaseFragment<T> extends Fragment {
                 @Override
                 public void run() {
                     try {
-                        mCallback.onState(STATE_LOADING, onCreateStateView(STATE_LOADING), "start onBackgroundLoading");
+                        mCallback.onState(STATE_LOADING, "start onBackgroundLoading");
                         mCallback.onSuccess(onBackgroundLoading(), mSavedInstanceState);
                     } catch (Exception e) {
                         Logger.printStackTrace(e);
-                        mCallback.onState(STATE_FAILURE, onCreateStateView(STATE_FAILURE), e.getMessage());
+                        mCallback.onState(STATE_FAILURE, e.getMessage());
                     }
                 }
             }).start();

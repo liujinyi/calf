@@ -2,12 +2,10 @@ package com.calf.player.activitys;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.PersistableBundle;
-import android.view.View;
-import android.widget.Button;
+import android.support.v4.app.FragmentTransaction;
 
 import com.calf.bean.OnlineInfo;
+import com.calf.fragments.BlankFragment;
 import com.calf.frame.log.Logger;
 
 /**
@@ -24,16 +22,10 @@ public class SingleTopActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         Logger.i(TAG, mSimpleName + "[onCreate] " + hashCode());
         super.onCreate(savedInstanceState);
-
-        Button btn = new Button(this);
-        btn.setText("点我试试");
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(SingleTopActivity.this, SingleTopActivity.class));
-            }
-        });
-        setContentView(btn);
+        FragmentTransaction t = getSupportFragmentManager().beginTransaction();
+        t.add(android.R.id.content, BlankFragment.newInstance("第一个"));
+        //t.add(android.R.id.content, BlankFragment.newInstance("第二个"));
+        t.commitAllowingStateLoss();
     }
 
     @Override

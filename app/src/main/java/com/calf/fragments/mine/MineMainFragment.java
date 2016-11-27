@@ -54,7 +54,7 @@ public class MineMainFragment extends BaseFragment<String> {
             @Override
             public String onBackgroundLoading() throws Exception {
                 Thread.sleep(1000);
-                return "我的详情页";
+                return "我的详情页,来自本地行为";
             }
         };
         return behavior;
