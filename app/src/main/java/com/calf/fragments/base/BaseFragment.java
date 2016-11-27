@@ -58,7 +58,6 @@ public abstract class BaseFragment<T> extends Fragment {
         super.onCreate(savedInstanceState);
         Logger.e(TAG, getSimpleName() + " [onCreate] " + hashCode());
         mBehavior = onBehaviorSetup();
-        setHasOptionsMenu(true);
         if (mBehavior != null) {
             mCallback = new Callback<T>() {
                 @Override
@@ -235,8 +234,6 @@ public abstract class BaseFragment<T> extends Fragment {
     protected void afterOnCreateStateView(int state, String message) {
         if (state == STATE_FAILURE) {
             Logger.e(TAG, getSimpleName() + " failure message:" + message);
-        } else {
-            Logger.e(TAG, getSimpleName() + " [afterOnCreateStateView] state :" + state + ":::" + message);
         }
     }
 
@@ -245,6 +242,7 @@ public abstract class BaseFragment<T> extends Fragment {
         Toolbar toolbar = (Toolbar) child.findViewById(R.id.common_toolbar);
         toolbar.setNavigationIcon(R.drawable.selector_common_back);
         onToolBarSetup(toolbar);
+        setHasOptionsMenu(true);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override

@@ -43,8 +43,8 @@ public class BlankFragment extends BaseFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Toast.makeText(getContext(), toString(), Toast.LENGTH_SHORT).show();
-        return true;
+        Toast.makeText(getContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -4,10 +4,15 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.calf.R;
 import com.calf.fragments.base.BaseFragment;
 
 /**
@@ -19,7 +24,18 @@ public class TestFragmentNoBehavior extends BaseFragment<String> {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setInitState(STATE_EMPTY);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
+        inflater.inflate(R.menu.fragment_blank_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Toast.makeText(getContext(), item.getTitle(), Toast.LENGTH_SHORT).show();
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -51,13 +67,4 @@ public class TestFragmentNoBehavior extends BaseFragment<String> {
         return behavior;
     }
 
-    @Override
-    protected void beforeOnCreateStateView(int state) {
-        super.beforeOnCreateStateView(state);
-    }
-
-    @Override
-    protected void afterOnCreateStateView(int state, String message) {
-        super.afterOnCreateStateView(state, message);
-    }
 }
