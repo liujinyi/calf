@@ -4,7 +4,9 @@ import android.support.annotation.IdRes;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
+import com.calf.R;
 import com.calf.fragments.base.BaseFragment;
+import com.calf.frame.tool.Assert;
 import com.calf.player.activitys.MainActivity;
 
 import java.util.Stack;
@@ -25,8 +27,12 @@ public class MainFragmentManager {
         if (mFragmentManager == null) {
             mFragmentManager = activity.getSupportFragmentManager();
         } else {
-            // Assert.classAssert(false, "MainFragmentManager [init] has execute");
+            Assert.classAssert(false, "MainFragmentManager [init] has execute");
         }
+    }
+
+    public static void release() {
+        mFragmentManager = null;
     }
 
     public static void showFragment(BaseFragment f) {
@@ -40,7 +46,7 @@ public class MainFragmentManager {
                 tag = String.valueOf(f.hashCode());
                 break;
         }
-        showFragment(tag, android.R.id.content, f);
+        showFragment(tag, R.id.fragment_container, f);
     }
 
     private static void showFragment(String tag, @IdRes int container, BaseFragment f) {
@@ -49,18 +55,20 @@ public class MainFragmentManager {
             topFragment.onFragmentInVisible();
         }
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
-        transaction.add(container, f, tag);
+        transaction.replace(container, f, tag);
         transaction.addToBackStack(tag);
         transaction.commitAllowingStateLoss();
         mStacks.push(f);
     }
 
     public static void closeFragment() {
-        mStacks.pop();
-        mFragmentManager.popBackStackImmediate();
-        BaseFragment topFragment = getTopFragment();
-        if (topFragment != null) {
-            topFragment.onFragmentVisible();
+        if (mStacks.size() > 0) {
+            mStacks.pop();
+            mFragmentManager.popBackStackImmediate();
+            BaseFragment topFragment = getTopFragment();
+            if (topFragment != null) {
+                topFragment.onFragmentVisible();
+            }
         }
     }
 

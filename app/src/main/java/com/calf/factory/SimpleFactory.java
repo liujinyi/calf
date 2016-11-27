@@ -1,7 +1,7 @@
 package com.calf.factory;
 
 import com.calf.fragments.base.BaseFragment;
-import com.calf.fragments.local.LocalMainFragment;
+import com.calf.fragments.mine.MineMainFragment;
 import com.calf.fragments.online.OnlineMainFragment;
 import com.calf.fragments.search.SearchMainFragment;
 
@@ -15,10 +15,10 @@ public class SimpleFactory {
         BaseFragment f = null;
         switch (position) {
             case 0:
-                f = OnlineMainFragment.newInstance(position);
+                f = MineMainFragment.newInstance(position);
                 break;
             case 1:
-                f = LocalMainFragment.newInstance(position);
+                f = OnlineMainFragment.newInstance(position);
                 break;
             case 2:
                 f = SearchMainFragment.newInstance(position);

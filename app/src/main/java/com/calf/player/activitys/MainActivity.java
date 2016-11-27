@@ -9,17 +9,14 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.calf.R;
 import com.calf.adapters.MainActivityTabAdapter;
 import com.calf.fragments.base.BaseFragment;
-import com.calf.fragments.BlankFragment;
 import com.calf.frame.log.Logger;
 import com.calf.player.manager.MainFragmentManager;
 
@@ -33,7 +30,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("");
-        toolbar.setBackgroundResource(R.color.red);
         setSupportActionBar(toolbar);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -58,28 +54,28 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 //        tabLayout.getTabAt(1).setIcon(R.drawable.selector_tab_local);
 //        tabLayout.getTabAt(2).setIcon(R.drawable.selector_tab_friend);
 
-        LayoutInflater inflater = LayoutInflater.from(this);
+//        LayoutInflater inflater = LayoutInflater.from(this);
+//
+//        FrameLayout f0 = (FrameLayout) inflater.inflate(R.layout.item_main_tab, tabLayout, false);
+//        ImageView imageView0 = (ImageView) f0.findViewById(R.id.icon);
+//        imageView0.setImageResource(R.drawable.selector_tab_online);
+//        tabLayout.getTabAt(0).setCustomView(imageView0);
+//
+//        FrameLayout f1 = (FrameLayout) inflater.inflate(R.layout.item_main_tab, tabLayout, false);
+//        ImageView imageView1 = (ImageView) f1.findViewById(R.id.icon);
+//        imageView1.setImageResource(R.drawable.selector_tab_local);
+//        tabLayout.getTabAt(1).setCustomView(imageView1);
+//
+//        FrameLayout f2 = (FrameLayout) inflater.inflate(R.layout.item_main_tab, tabLayout, false);
+//        ImageView imageView2 = (ImageView) f2.findViewById(R.id.icon);
+//        imageView2.setImageResource(R.drawable.selector_tab_friend);
+//        tabLayout.getTabAt(2).setCustomView(imageView2);
 
-        FrameLayout f0 = (FrameLayout) inflater.inflate(R.layout.item_main_tab, tabLayout, false);
-        ImageView imageView0 = (ImageView) f0.findViewById(R.id.icon);
-        imageView0.setImageResource(R.drawable.selector_tab_online);
-        tabLayout.getTabAt(0).setCustomView(imageView0);
-
-        FrameLayout f1 = (FrameLayout) inflater.inflate(R.layout.item_main_tab, tabLayout, false);
-        ImageView imageView1 = (ImageView) f1.findViewById(R.id.icon);
-        imageView1.setImageResource(R.drawable.selector_tab_local);
-        tabLayout.getTabAt(1).setCustomView(imageView1);
-
-        FrameLayout f2 = (FrameLayout) inflater.inflate(R.layout.item_main_tab, tabLayout, false);
-        ImageView imageView2 = (ImageView) f2.findViewById(R.id.icon);
-        imageView2.setImageResource(R.drawable.selector_tab_friend);
-        tabLayout.getTabAt(2).setCustomView(imageView2);
-
-        for (int i = 0; i < 6; i++) {
-            BlankFragment f = new BlankFragment();
-            f.mStr = "BlankFragment " + i;
-            MainFragmentManager.showFragment(f);
-        }
+//        for (int i = 0; i < 6; i++) {
+//            BlankFragment f = new BlankFragment();
+//            f.mStr = "BlankFragment " + i;
+//            MainFragmentManager.showFragment(f);
+//        }
 
     }
 
@@ -175,5 +171,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onDestroy() {
         Logger.e(TAG, mSimpleName + "[onDestroy] ");
         super.onDestroy();
+        MainFragmentManager.release();
     }
+
 }

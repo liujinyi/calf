@@ -26,11 +26,20 @@ public class MainActivityTabAdapter extends FragmentPagerAdapter {
         return 3;
     }
 
-//    @Override
-//    public CharSequence getPageTitle(int position) {
-//        if (position >= 0){
-//            return "更多";
-//        }
-//        return super.getPageTitle(position);
-//    }
+    @Override
+    public CharSequence getPageTitle(int position) {
+        String str = "更多";
+        switch (position) {
+            case 0:
+                str = "我的";
+                break;
+            case 1:
+                str = "乐库";
+                break;
+            case 2:
+                str = "发现";
+                break;
+        }
+        return str;
+    }
 }

@@ -1,4 +1,4 @@
-package com.calf.fragments.online;
+package com.calf.fragments.base;
 
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -11,33 +11,23 @@ import android.view.ViewGroup;
 
 import com.calf.R;
 import com.calf.fragments.BlankFragment;
-import com.calf.fragments.base.BaseFragment;
+import com.calf.fragments.online.RecommendFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by JinYi Liu on 16-11-12.
+ * Created by JinYi Liu on 16-11-26.
  */
 
-public class OnlineMainFragment extends BaseFragment {
+public class TabFragment extends BaseFragment {
 
-    public static OnlineMainFragment newInstance(int sectionNumber) {
-        OnlineMainFragment fragment = new OnlineMainFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    protected boolean isShowTitleContainer() {
-        return false;
-    }
 
     @Override
     protected ViewGroup onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, Object o) {
         ViewGroup child = (ViewGroup) inflater.inflate(R.layout.fragment_tab, container, false);
         TabAdapter tabAdapter = new TabAdapter(getChildFragmentManager());
+        // Set up the ViewPager with the sections adapter.
         ViewPager mViewPager = (ViewPager) child.findViewById(R.id.container);
         mViewPager.setAdapter(tabAdapter);
         TabLayout tabLayout = (TabLayout) child.findViewById(R.id.tabs);
