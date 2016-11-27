@@ -297,7 +297,7 @@ public abstract class BaseFragment<T> extends Fragment {
             return;
         }
         if (mInViewPager && !isPreloadInViewPager() && !mVisibleToUser) {
-            showStateView(STATE_LOADING, null, MESSAGE_PRELOAD_VIEW);
+            showStateView(STATE_PRELOAD, null, MESSAGE_PRELOAD_VIEW);
         } else {
             if (mRestoreFragment && t != null) {
                 showContentView(savedInstanceState, t);
