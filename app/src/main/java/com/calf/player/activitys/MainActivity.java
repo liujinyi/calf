@@ -96,7 +96,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.activity_main_menu, menu);
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 startActivity(new Intent(MainActivity.this, SingleTopActivity.class));
                 break;
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
