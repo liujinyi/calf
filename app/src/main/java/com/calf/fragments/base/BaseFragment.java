@@ -23,11 +23,11 @@ import com.calf.player.manager.MainFragmentManager;
 
 public abstract class BaseFragment<T> extends Fragment {
 
-    public static final int STATE_EMPTY = 1001;
-    public static final int STATE_NO_NET = 1002;
-    public static final int STATE_FAILURE = 1003;
-    public static final int STATE_LOADING = 1004;
-    public static final int STATE_SUCCESS = 1005;
+    public static final int STATE_NO_NET = 1001;
+    public static final int STATE_FAILURE = 1002;
+    public static final int STATE_LOADING = 1003;
+
+    public static final int STATE_SUCCESS = 1004;
 
     private static final String TAG = "BaseFragment";
     private static final String MESSAGE_PRELOAD_VIEW = "viewpager preload view create";
@@ -163,7 +163,7 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     public final void setInitState(int state) {
-        if (state >= STATE_EMPTY && state <= STATE_SUCCESS) {
+        if (state >= STATE_NO_NET && state <= STATE_SUCCESS) {
             this.mInitState = state;
         }
     }
@@ -196,7 +196,7 @@ public abstract class BaseFragment<T> extends Fragment {
         if (isFragmentAlive() && mHasOnCreateContentView) {
             int count = mContentContainer.getChildCount();
             if (count == 1) {
-                mContentContainer.addView(mBehavior.onCreateStateView(STATE_EMPTY));
+                mContentContainer.addView(onCreateEmptyView(getLayoutInflater(), mContentContainer));
             }
         }
     }
@@ -210,10 +210,14 @@ public abstract class BaseFragment<T> extends Fragment {
         }
     }
 
+    public ViewGroup onCreateEmptyView(LayoutInflater inflater, ViewGroup container) {
+        return SimpleFactory.createStateView(inflater, container, "暂无内容");
+    }
+
     protected ViewGroup onCreatePreloadView(LayoutInflater inflater, ViewGroup container) {
         ViewGroup child = null;
         if (mBehavior == null) {
-            child = SimpleFactory.createStateView(inflater, container, StateViewFactory.DEFAULT_EMPTY_CONTENT);
+            child = SimpleFactory.createStateView(inflater, container, StateViewFactory.DEFAULT_LOADING_CONTENT);
         } else {
             child = mBehavior.onCreateStateView(STATE_LOADING);
         }
@@ -324,7 +328,6 @@ public abstract class BaseFragment<T> extends Fragment {
                 showContentView(savedInstanceState, null);
             } else {
                 switch (mInitState) {
-                    case STATE_EMPTY:
                     case STATE_FAILURE:
                         showStateView(mInitState, mBehavior, MESSAGE_SET_CURRENT_STATE);
                         break;
@@ -382,10 +385,6 @@ public abstract class BaseFragment<T> extends Fragment {
             };
         }
 
-        public final void setEmptyContent(String content) {
-            getFactory().setEmptyContent(content);
-        }
-
         public final void setFailureContent(String content) {
             getFactory().setFailureContent(content);
         }
@@ -438,8 +437,6 @@ public abstract class BaseFragment<T> extends Fragment {
         public final ViewGroup onCreateStateView(int state) {
             StateViewFactory factory = getFactory();
             switch (state) {
-                case STATE_EMPTY:
-                    return factory.onCreateEmptyView(mInflater, mContainer);
                 case STATE_LOADING:
                     return factory.onCreateLoadingView(mInflater, mContainer);
                 case STATE_FAILURE:
@@ -450,11 +447,44 @@ public abstract class BaseFragment<T> extends Fragment {
         }
     }
 
-    protected abstract class OnlineBehavior<T> implements Behavior<T> {
+    protected abstract class OnlineBehavior implements Behavior<T> {
 
         public abstract String giveMeUrl();
 
         public abstract T onBackgroundParser(String data);
+
+        private ViewGroup mContainer;
+        private Callback<T> mCallback;
+        private LayoutInflater mInflater;
+        private OnRetryListener mListener;
+        private Bundle mSavedInstanceState;
+        private OnlineStateViewFactory mFactory;
+
+        public OnlineBehavior() {
+            this.mListener = new OnRetryListener() {
+                @Override
+                public void onRetry() {
+                    if (mCallback != null) {
+                        doInBackground(mSavedInstanceState);
+                    }
+                }
+            };
+        }
+
+        @Override
+        public final ViewGroup onCreateStateView(int state) {
+            switch (state) {
+                case STATE_NO_NET:
+                    return mFactory.onCreateNoNetView(mInflater, mContainer);
+                case STATE_LOADING:
+                    return mFactory.onCreateLoadingView(mInflater, mContainer);
+                case STATE_FAILURE:
+                    return mFactory.onCreateFailureView(mInflater, mContainer);
+                default:
+                    return null;
+            }
+        }
+
     }
 
     protected interface OnRetryListener {
@@ -463,12 +493,9 @@ public abstract class BaseFragment<T> extends Fragment {
 
     interface StateViewFactory {
 
-        String DEFAULT_EMPTY_CONTENT = "暂无内容";
         String DEFAULT_LOADING_CONTENT = "正在加载中...";
         String DEFAULT_FAILURE_CONTENT = "加载失败,点击屏幕重试!";
         String DEFAULT_NO_NET_CONTENT = "无可用网络连接,点击屏幕重试!";
-
-        ViewGroup onCreateEmptyView(LayoutInflater inflater, ViewGroup container);
 
         ViewGroup onCreateLoadingView(LayoutInflater inflater, ViewGroup container);
 
@@ -477,19 +504,12 @@ public abstract class BaseFragment<T> extends Fragment {
 
     static class LocalStateViewFactory implements StateViewFactory {
 
-        private String mEmptyContent;
         private String mFailureContent;
         private String mLoadingContent;
         private OnRetryListener mListener;
 
         public LocalStateViewFactory(OnRetryListener listener) {
             this.mListener = listener;
-        }
-
-        public final void setEmptyContent(String content) {
-            if (!TextUtils.isEmpty(content)) {
-                this.mEmptyContent = content;
-            }
         }
 
         public final void setFailureContent(String content) {
@@ -506,11 +526,6 @@ public abstract class BaseFragment<T> extends Fragment {
 
         public final OnRetryListener getListener() {
             return mListener;
-        }
-
-        @Override
-        public ViewGroup onCreateEmptyView(LayoutInflater inflater, ViewGroup container) {
-            return SimpleFactory.createStateView(inflater, container, TextUtils.isEmpty(mEmptyContent) ? DEFAULT_EMPTY_CONTENT : mEmptyContent);
         }
 
         @Override

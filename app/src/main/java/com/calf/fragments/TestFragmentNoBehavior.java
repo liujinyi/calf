@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.calf.R;
 import com.calf.fragments.base.BaseFragment;
+import com.calf.frame.message.MessageManager;
 
 /**
  * Created by JinYi Liu on 16-11-27.
@@ -68,14 +69,14 @@ public class TestFragmentNoBehavior extends BaseFragment<String> {
 
     @Override
     protected void afterOnCreateContentView(String s) {
-//        // ... do some thing
-//        showEmptyView();
-//
-//        MessageManager.postDelayed(3000, new Runnable() {
-//            @Override
-//            public void run() {
-//                removeEmptyView();
-//            }
-//        });
+        // ... do some thing
+        showEmptyView();
+
+        MessageManager.postDelayed(3000, new Runnable() {
+            @Override
+            public void run() {
+                removeEmptyView();
+            }
+        });
     }
 }
