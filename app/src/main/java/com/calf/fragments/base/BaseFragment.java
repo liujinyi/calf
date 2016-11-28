@@ -56,7 +56,6 @@ public abstract class BaseFragment<T> extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Logger.e(TAG, getSimpleName() + " [onCreate] " + hashCode());
         mBehavior = onBehaviorSetup();
         if (mBehavior != null) {
             mCallback = new Callback<T>() {
@@ -81,18 +80,11 @@ public abstract class BaseFragment<T> extends Fragment {
         mRestoreFragment = true;
         mHasOnCreateView = false;
         mHasOnCreateContentView = false;
-        Logger.w(TAG, getSimpleName() + " [onDestroyView] " + hashCode());
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return true;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Logger.e(TAG, getSimpleName() + " [onDestroy] " + hashCode());
     }
 
     @Override
@@ -116,7 +108,6 @@ public abstract class BaseFragment<T> extends Fragment {
 
     @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Logger.w(TAG, getSimpleName() + " [onCreateView]");
         this.mSavedInstanceState = savedInstanceState;
         this.mRootContainer = (ViewGroup) inflater.inflate(R.layout.fragment_base, container, false);
         this.mTitleContainer = (FrameLayout) mRootContainer.findViewById(R.id.title_container);
