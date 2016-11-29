@@ -27,15 +27,13 @@ public abstract class BaseFragment<T> extends Fragment {
     public static final int STATE_FAILURE = 1002;
     public static final int STATE_LOADING = 1003;
 
-    public static final int STATE_SUCCESS = 1004;
-
     private static final String TAG = "BaseFragment";
     private static final String MESSAGE_PRELOAD_VIEW = "viewpager preload view create";
     private static final String MESSAGE_SET_CURRENT_STATE = "user call setInitState method";
 
-    private int mInitState;
     private int mCurrentState;
     private String mSimpleName;
+    private boolean mFailureFlag;
     private boolean mInViewPager;
     private boolean mVisibleToUser;
     private boolean mHasOnCreateView;
@@ -153,10 +151,12 @@ public abstract class BaseFragment<T> extends Fragment {
         return (getActivity() != null && !getActivity().isFinishing() && !isDetached());
     }
 
-    public final void setInitState(int state) {
-        if (state >= STATE_NO_NET && state <= STATE_SUCCESS) {
-            this.mInitState = state;
-        }
+    public final void setFailureFlag() {
+        this.mFailureFlag = true;
+    }
+
+    public final void setSuccessFlag(T t) {
+        this.t = t;
     }
 
     protected Behavior onBehaviorSetup() {
@@ -206,7 +206,7 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     protected ViewGroup onCreatePreloadView(LayoutInflater inflater, ViewGroup container) {
-        ViewGroup child = null;
+        ViewGroup child;
         if (mBehavior == null) {
             child = SimpleFactory.createStateView(inflater, container, StateViewFactory.DEFAULT_LOADING_CONTENT);
         } else {
@@ -279,7 +279,6 @@ public abstract class BaseFragment<T> extends Fragment {
             @Override
             public void run() {
                 if (isFragmentAlive() && !mHasOnCreateContentView && state != mCurrentState) {
-                    ViewGroup child = null;
                     beforeOnCreateStateView(state);
                     addContentView(behavior.onCreateStateView(state));
                     mCurrentState = state;
@@ -310,24 +309,22 @@ public abstract class BaseFragment<T> extends Fragment {
         if (mInViewPager && !isPreloadInViewPager() && !mVisibleToUser) {
             showPreloadView(STATE_LOADING, MESSAGE_PRELOAD_VIEW);
         } else {
-            if (mRestoreFragment && t != null) {
-                showContentView(savedInstanceState, t);
+            if (mRestoreFragment) {
                 mRestoreFragment = false;
-                return;
+                if (t != null) {
+                    showContentView(savedInstanceState, t);
+                    return;
+                }
             }
             if (mBehavior == null) {
-                showContentView(savedInstanceState, null);
+                showContentView(savedInstanceState, t);
             } else {
-                switch (mInitState) {
-                    case STATE_FAILURE:
-                        showStateView(mInitState, mBehavior, MESSAGE_SET_CURRENT_STATE);
-                        break;
-                    case STATE_SUCCESS:
-                        showContentView(savedInstanceState, null);
-                        break;
-                    default:
-                        mBehavior.doInBackground(savedInstanceState);
-                        break;
+                if (t != null) {
+                    showContentView(savedInstanceState, t);
+                } else if (mFailureFlag) {
+                    showStateView(STATE_FAILURE, mBehavior, MESSAGE_SET_CURRENT_STATE);
+                } else {
+                    mBehavior.doInBackground(savedInstanceState);
                 }
             }
         }
@@ -365,7 +362,7 @@ public abstract class BaseFragment<T> extends Fragment {
         private Bundle mSavedInstanceState;
         private LocalStateViewFactory mFactory;
 
-        public LocalBehavior() {
+        protected LocalBehavior() {
             this.mListener = new OnRetryListener() {
                 @Override
                 public void onRetry() {
@@ -451,7 +448,7 @@ public abstract class BaseFragment<T> extends Fragment {
         private Bundle mSavedInstanceState;
         private OnlineStateViewFactory mFactory;
 
-        public OnlineBehavior() {
+        protected OnlineBehavior() {
             this.mListener = new OnRetryListener() {
                 @Override
                 public void onRetry() {
@@ -499,23 +496,23 @@ public abstract class BaseFragment<T> extends Fragment {
         private String mLoadingContent;
         private OnRetryListener mListener;
 
-        public LocalStateViewFactory(OnRetryListener listener) {
+        LocalStateViewFactory(OnRetryListener listener) {
             this.mListener = listener;
         }
 
-        public final void setFailureContent(String content) {
+        final void setFailureContent(String content) {
             if (!TextUtils.isEmpty(content)) {
                 this.mFailureContent = content;
             }
         }
 
-        public final void setLoadingContent(String content) {
+        final void setLoadingContent(String content) {
             if (!TextUtils.isEmpty(content)) {
                 this.mLoadingContent = content;
             }
         }
 
-        public final OnRetryListener getListener() {
+        final OnRetryListener getListener() {
             return mListener;
         }
 
