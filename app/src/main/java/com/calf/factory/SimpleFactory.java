@@ -5,6 +5,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.calf.fragments.base.BaseFragment;
+import com.calf.fragments.discover.DiscoverMainFragment;
 import com.calf.fragments.mine.MineMainFragment;
 import com.calf.fragments.online.OnlineMainFragment;
 import com.calf.fragments.search.SearchMainFragment;
@@ -20,16 +21,15 @@ public class SimpleFactory {
         BaseFragment f = null;
         switch (position) {
             case 0:
-                f = MineMainFragment.newInstance(position);
+                f = MineMainFragment.newInstance();
                 break;
             case 1:
-                f = OnlineMainFragment.newInstance(position);
+                f = OnlineMainFragment.newInstance();
                 break;
             case 2:
-                f = SearchMainFragment.newInstance(position);
+                f = DiscoverMainFragment.newInstance();
                 break;
             default:
-                f = OnlineMainFragment.newInstance(position);
                 break;
         }
         return f;

@@ -3,14 +3,11 @@ package com.calf.fragments.mine;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.calf.fragments.TestFragmentNoBehavior;
 import com.calf.fragments.base.BaseFragment;
 import com.calf.player.R;
-import com.calf.player.manager.MainFragmentManager;
 
 /**
  * Created by JinYi Liu on 16-11-12.
@@ -18,7 +15,7 @@ import com.calf.player.manager.MainFragmentManager;
 
 public class MineMainFragment extends BaseFragment<String> {
 
-    public static MineMainFragment newInstance(int sectionNumber) {
+    public static MineMainFragment newInstance() {
         MineMainFragment fragment = new MineMainFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
@@ -31,20 +28,14 @@ public class MineMainFragment extends BaseFragment<String> {
     }
 
     @Override
-    protected ViewGroup onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, String data) {
-        ViewGroup child = (ViewGroup) inflater.inflate(R.layout.fragment_mine, container, false);
+    protected ViewGroup onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, String s) {
+        ViewGroup child = (ViewGroup) inflater.inflate(R.layout.fragment_mine_main, container, false);
         TextView textView = (TextView) child.findViewById(R.id.section_label);
-        if (TextUtils.isEmpty(data)) {
+        if (TextUtils.isEmpty(s)) {
             textView.setText("我的详情页");
         } else {
-            textView.setText(data);
+            textView.setText(s);
         }
-        child.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainFragmentManager.showFragment(new TestFragmentNoBehavior());
-            }
-        });
         return child;
     }
 
@@ -53,7 +44,6 @@ public class MineMainFragment extends BaseFragment<String> {
         LocalBehavior behavior = new LocalBehavior() {
             @Override
             public String onBackgroundLoading() throws Exception {
-                Thread.sleep(1000);
                 return "我的详情页,来自本地行为";
             }
         };

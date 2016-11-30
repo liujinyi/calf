@@ -6,14 +6,12 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.calf.fragments.base.BaseFragment;
 import com.calf.player.R;
-import com.calf.player.manager.MainFragmentManager;
 
 /**
  * Created by JinYi Liu on 16-11-22.
@@ -37,7 +35,7 @@ public class BlankFragment extends BaseFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.clear();
+        super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_blank_menu, menu);
     }
 
@@ -58,12 +56,6 @@ public class BlankFragment extends BaseFragment {
         } else {
             textView.setText(mStr);
         }
-        child.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainFragmentManager.showFragment(newInstance(toString()));
-            }
-        });
         return child;
     }
 

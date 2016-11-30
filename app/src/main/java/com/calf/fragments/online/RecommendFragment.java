@@ -33,17 +33,4 @@ public class RecommendFragment extends BaseFragment<OnlineInfo> {
         outState.putString(getSimpleName(), "销毁后重新创建");
     }
 
-    @Override
-    protected Behavior onBehaviorSetup() {
-        LocalBehavior behavior = new LocalBehavior() {
-            @Override
-            public OnlineInfo onBackgroundLoading() throws Exception {
-                Thread.sleep(5000);
-                return null;
-            }
-        };
-        behavior.setLoadingContent("自定义Loading .... ");
-        return behavior;
-    }
-
 }

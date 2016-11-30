@@ -1,38 +1,45 @@
-package com.calf.fragments.search;
+package com.calf.fragments.discover;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.calf.fragments.base.BaseFragment;
-import com.calf.fragments.base.TabFragment;
 import com.calf.player.R;
-import com.calf.player.manager.MainFragmentManager;
 
 /**
- * Created by JinYi Liu on 16-11-12.
+ * Created by JinYi Liu on 16-11-30.
  */
 
-public class SearchMainFragment extends BaseFragment<String> {
+public class DiscoverMainFragment extends BaseFragment<String> {
 
-    public static SearchMainFragment newInstance() {
-        SearchMainFragment fragment = new SearchMainFragment();
+    public static DiscoverMainFragment newInstance() {
+        DiscoverMainFragment fragment = new DiscoverMainFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
+    protected boolean isShowTitleContainer() {
+        return false;
+    }
+
+    @Override
     protected ViewGroup onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, String s) {
-        ViewGroup child = (ViewGroup) inflater.inflate(R.layout.fragment_search_main, container, false);
+        ViewGroup child = (ViewGroup) inflater.inflate(R.layout.fragment_discover_main, container, false);
         TextView textView = (TextView) child.findViewById(R.id.section_label);
-        textView.setText("搜索详情页");
+        if (TextUtils.isEmpty(s)) {
+            textView.setText("发现详情页");
+        } else {
+            textView.setText(s);
+        }
         child.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainFragmentManager.showFragment(new TabFragment());
             }
         });
         return child;
