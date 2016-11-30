@@ -12,9 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.calf.R;
 import com.calf.fragments.base.BaseFragment;
 import com.calf.frame.message.MessageManager;
+import com.calf.player.R;
 
 /**
  * Created by JinYi Liu on 16-11-27.

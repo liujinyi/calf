@@ -4,9 +4,9 @@ import android.support.annotation.IdRes;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
-import com.calf.R;
 import com.calf.fragments.base.BaseFragment;
 import com.calf.frame.tool.Assert;
+import com.calf.player.R;
 import com.calf.player.activitys.MainActivity;
 
 import java.util.Stack;

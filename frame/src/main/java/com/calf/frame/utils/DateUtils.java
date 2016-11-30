@@ -9,7 +9,7 @@ import java.util.Date;
 /**
  * @author JinYi Liu
  */
-public class FrameDateUtils {
+public class DateUtils {
 
     public static boolean isDelayMills(long cacheMillis, long expiredMillis) {
         return isDelayMills(System.currentTimeMillis(), cacheMillis, expiredMillis);

@@ -7,9 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.calf.R;
 import com.calf.fragments.TestFragmentNoBehavior;
 import com.calf.fragments.base.BaseFragment;
+import com.calf.player.R;
 import com.calf.player.manager.MainFragmentManager;
 
 /**

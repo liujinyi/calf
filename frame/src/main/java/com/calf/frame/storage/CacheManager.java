@@ -5,8 +5,8 @@ import android.util.Base64;
 
 import com.calf.frame.tool.Assert;
 import com.calf.frame.log.Logger;
-import com.calf.frame.utils.FrameDateUtils;
-import com.calf.frame.utils.FrameFileUtils;
+import com.calf.frame.utils.DateUtils;
+import com.calf.frame.utils.FileUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -95,7 +95,7 @@ public class CacheManager {
             }
             if (!flag) {
                 try {
-                    FrameFileUtils.delete(file);
+                    FileUtils.delete(file);
                 } catch (IOException e) {
                     Logger.printStackTrace(e);
                 }
@@ -141,7 +141,7 @@ public class CacheManager {
                     String[] arr = str.split("S");
                     long cacheMillis = Long.parseLong(arr[1]);
                     long expiredMillis = Long.parseLong(arr[2]);
-                    expire = FrameDateUtils.isApartMills(cacheMillis, expiredMillis);
+                    expire = DateUtils.isApartMills(cacheMillis, expiredMillis);
                 } else {
                     firstReadStr = str;
                 }
@@ -185,7 +185,7 @@ public class CacheManager {
         boolean flag = false;
         String path = createCacheFilePath(dir, key);
         try {
-            flag = FrameFileUtils.delete(path);
+            flag = FileUtils.delete(path);
         } catch (IOException e) {
             Logger.printStackTrace(e);
         }
@@ -221,7 +221,7 @@ public class CacheManager {
                         String[] arr = cacheHead.split("S");
                         long cacheMillis = Integer.parseInt(arr[1]);
                         long expiredMillis = Integer.parseInt(arr[2]);
-                        flag = FrameDateUtils.isApartMills(cacheMillis, expiredMillis);
+                        flag = DateUtils.isApartMills(cacheMillis, expiredMillis);
                     }
                 } catch (Exception e) {
                     Logger.printStackTrace(e);
@@ -245,7 +245,7 @@ public class CacheManager {
 
     public void clean(String dir) {
         try {
-            FrameFileUtils.delete(dir);
+            FileUtils.delete(dir);
         } catch (IOException e) {
             Logger.printStackTrace(e);
         }

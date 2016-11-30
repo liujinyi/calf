@@ -11,10 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.calf.R;
 import com.calf.factory.SimpleFactory;
 import com.calf.frame.log.Logger;
 import com.calf.frame.message.MessageManager;
+import com.calf.player.R;
 import com.calf.player.manager.MainFragmentManager;
 
 /**

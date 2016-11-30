@@ -4,11 +4,11 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.calf.R;
 import com.calf.fragments.base.BaseFragment;
 import com.calf.fragments.mine.MineMainFragment;
 import com.calf.fragments.online.OnlineMainFragment;
 import com.calf.fragments.search.SearchMainFragment;
+import com.calf.player.R;
 
 /**
  * Created by JinYi Liu on 16-11-12.

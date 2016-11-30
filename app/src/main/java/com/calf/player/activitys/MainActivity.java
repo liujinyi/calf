@@ -12,10 +12,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.calf.R;
 import com.calf.adapters.MainActivityTabAdapter;
 import com.calf.fragments.base.BaseFragment;
 import com.calf.frame.log.Logger;
+import com.calf.player.R;
 import com.calf.player.manager.MainFragmentManager;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {

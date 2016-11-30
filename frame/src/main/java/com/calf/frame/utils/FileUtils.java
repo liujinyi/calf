@@ -13,10 +13,10 @@ import java.io.IOException;
 /**
  * @author JinYi Liu
  */
-public class FrameFileUtils {
+public class FileUtils {
 
-    private static final String TAG = "FrameUtils";
-    private static final String CLASS_NAME = FrameFileUtils.class.getSimpleName();
+    private static final String TAG = "Utils";
+    private static final String CLASS_NAME = FileUtils.class.getSimpleName();
 
     /**
      * 获取文件扩展名

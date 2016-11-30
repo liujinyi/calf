@@ -2,7 +2,7 @@ package com.calf.frame.storage;
 
 import android.content.Context;
 
-import com.calf.frame.utils.FrameFileUtils;
+import com.calf.frame.utils.FileUtils;
 
 import java.io.File;
 
@@ -30,7 +30,7 @@ public class FolderHelper {
         if (mInit) {
             return;
         }
-        if (FrameFileUtils.isExternalStorageReadable()) {
+        if (FileUtils.isExternalStorageReadable()) {
             mRootPath = context.getExternalCacheDir().getParent();
             mCachePathRoot = mRootPath + SEPARATOR + "cache";
             mInit = true;
@@ -66,7 +66,7 @@ public class FolderHelper {
                 path = mCachePathRoot + SEPARATOR + ".library";
                 break;
             case TYPE_MUSIC_DOWN:
-                path = FrameFileUtils.getExternalStorageMusicDirectory().getAbsolutePath();
+                path = FileUtils.getExternalStorageMusicDirectory().getAbsolutePath();
                 break;
             default:
                 throw new RuntimeException("FolderHelper [getFolderPath] folderType undefined");

@@ -9,9 +9,9 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.calf.R;
 import com.calf.fragments.BlankFragment;
 import com.calf.fragments.online.RecommendFragment;
+import com.calf.player.R;
 
 import java.util.ArrayList;
 import java.util.List;

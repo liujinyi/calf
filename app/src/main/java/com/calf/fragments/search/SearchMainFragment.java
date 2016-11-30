@@ -5,8 +5,8 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.calf.R;
 import com.calf.fragments.base.BaseFragment;
+import com.calf.player.R;
 
 /**
  * Created by JinYi Liu on 16-11-12.
