@@ -123,9 +123,9 @@ public abstract class BaseFragment<T> extends Fragment {
                 mTitleContainer.addView(titleContainer);
             }
         }
-        if (mBehavior != null) {
-            mBehavior.initBehavior(inflater, mContentContainer, mCallback);
-        }
+//        if (mBehavior != null) {
+//            mBehavior.initBehavior(inflater, mContentContainer, mCallback);
+//        }
         handlerPreloadInViewPager(savedInstanceState);
         this.mHasOnCreateView = true;
         return this.mRootContainer;
@@ -215,7 +215,7 @@ public abstract class BaseFragment<T> extends Fragment {
     protected ViewGroup onCreatePreloadView(LayoutInflater inflater, ViewGroup container) {
         ViewGroup child;
         if (mBehavior == null) {
-            child = SimpleFactory.createStateView(inflater, container, StateViewFactory.DEFAULT_LOADING_CONTENT);
+            child = SimpleFactory.createStateView(inflater, container, AbstractStateViewFactory.DEFAULT_LOADING_CONTENT);
         } else {
             child = mBehavior.onCreateStateView(STATE_LOADING);
         }
@@ -341,15 +341,16 @@ public abstract class BaseFragment<T> extends Fragment {
         STANDARD, SINGLE
     }
 
+    interface StateViewFactory {
 
-    protected interface Behavior<T> {
+        ViewGroup onCreateLoadingView(LayoutInflater inflater, ViewGroup container);
 
-        ViewGroup onCreateStateView(int state);
+        ViewGroup onCreateFailureView(LayoutInflater inflater, ViewGroup container);
 
-        void doInBackground(Bundle savedInstanceState);
+    }
 
-        void initBehavior(LayoutInflater inflater, ViewGroup container, Callback<T> callback);
-
+    protected interface OnRetryListener {
+        void onRetry();
     }
 
     protected interface Callback<T> {
@@ -360,66 +361,40 @@ public abstract class BaseFragment<T> extends Fragment {
 
     }
 
-    protected abstract class LocalBehavior implements Behavior<T> {
+    protected interface Behavior<T> {
 
-        private ViewGroup mContainer;
-        private Callback<T> mCallback;
-        private LayoutInflater mInflater;
-        private OnRetryListener mListener;
-        private Bundle mSavedInstanceState;
-        private LocalStateViewFactory mFactory;
+        ViewGroup onCreateStateView(int state);
 
-        protected LocalBehavior() {
-            this.mListener = new OnRetryListener() {
-                @Override
-                public void onRetry() {
-                    if (mCallback != null) {
-                        doInBackground(mSavedInstanceState);
-                    }
-                }
-            };
-        }
+        void doInBackground(Bundle savedInstanceState);
 
-        public final void setFailureContent(String content) {
-            getFactory().setFailureContent(content);
-        }
+    }
 
-        public final void setLoadingContent(String content) {
-            getFactory().setLoadingContent(content);
-        }
+    protected abstract class BackgroundBehavior extends AbstractBehavior {
 
-        public final OnRetryListener getListener() {
-            return mListener;
-        }
-
-        public abstract T onBackgroundLoading() throws Exception;
-
-        private LocalStateViewFactory getFactory() {
-            if (mFactory == null) {
-                mFactory = new LocalStateViewFactory(mListener);
-            }
-            return mFactory;
+        protected BackgroundBehavior() {
+            super(new BackgroundStateViewFactory());
         }
 
         @Override
-        public void initBehavior(LayoutInflater inflater, ViewGroup container, Callback<T> callback) {
-            if (inflater == null || container == null || callback == null) {
-                throw new RuntimeException("LocalBehavior [doInBackground] has null parameter");
+        public final ViewGroup onCreateStateView(int state) {
+            switch (state) {
+                case STATE_LOADING:
+                    return getFactory().onCreateLoadingView(getLayoutInflater(), getContentContainer());
+                case STATE_FAILURE:
+                    return getFactory().onCreateFailureView(getLayoutInflater(), getContentContainer());
+                default:
+                    return null;
             }
-            this.mCallback = callback;
-            this.mInflater = inflater;
-            this.mContainer = container;
         }
 
         @Override
-        public final void doInBackground(Bundle savedInstanceState) {
-            this.mSavedInstanceState = savedInstanceState;
+        public final void doInBackground(final Bundle savedInstanceState) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         mCallback.onState(STATE_LOADING, "start onBackgroundLoading");
-                        mCallback.onSuccess(onBackgroundLoading(), mSavedInstanceState);
+                        mCallback.onSuccess(onBackgroundLoading(), savedInstanceState);
                     } catch (Exception e) {
                         Logger.printStackTrace(e);
                         mCallback.onState(STATE_FAILURE, e.getMessage());
@@ -428,109 +403,112 @@ public abstract class BaseFragment<T> extends Fragment {
             }).start();
         }
 
-        @Override
-        public final ViewGroup onCreateStateView(int state) {
-            StateViewFactory factory = getFactory();
-            switch (state) {
-                case STATE_LOADING:
-                    return factory.onCreateLoadingView(mInflater, mContainer);
-                case STATE_FAILURE:
-                    return factory.onCreateFailureView(mInflater, mContainer);
-                default:
-                    return null;
-            }
+        public abstract T onBackgroundLoading() throws Exception;
+
+    }
+
+    protected abstract class NetBehavior extends AbstractBehavior {
+
+        protected NetBehavior() {
+            super(new NetStateViewFactory());
         }
+
+        abstract String giveMeUrl();
+
+        abstract T onBackgroundParser(String message);
+
     }
 
-//    protected abstract class OnlineBehavior implements Behavior<T> {
-//
-//        public abstract String giveMeUrl();
-//
-//        public abstract T onBackgroundParser(String data);
-//
-//        private ViewGroup mContainer;
-//        private Callback<T> mCallback;
-//        private LayoutInflater mInflater;
-//        private OnRetryListener mListener;
-//        private Bundle mSavedInstanceState;
-//        private OnlineStateViewFactory mFactory;
-//
-//        protected OnlineBehavior() {
-//            this.mListener = new OnRetryListener() {
-//                @Override
-//                public void onRetry() {
-//                    if (mCallback != null) {
-//                        doInBackground(mSavedInstanceState);
-//                    }
-//                }
-//            };
-//        }
-//
-//        @Override
-//        public final ViewGroup onCreateStateView(int state) {
-//            switch (state) {
-//                case STATE_NO_NET:
-//                    return mFactory.onCreateNoNetView(mInflater, mContainer);
-//                case STATE_LOADING:
-//                    return mFactory.onCreateLoadingView(mInflater, mContainer);
-//                case STATE_FAILURE:
-//                    return mFactory.onCreateFailureView(mInflater, mContainer);
-//                default:
-//                    return null;
-//            }
-//        }
-//
-//    }
+    protected abstract class AbstractBehavior implements Behavior<T> {
 
-    protected interface OnRetryListener {
-        void onRetry();
+        private OnRetryListener mListener;
+        private AbstractStateViewFactory mFactory;
+
+        protected AbstractBehavior(AbstractStateViewFactory factory) {
+            this.mListener = new OnRetryListener() {
+                @Override
+                public void onRetry() {
+                    if (mCallback != null) {
+                        doInBackground(mSavedInstanceState);
+                    }
+                }
+            };
+            this.mFactory = factory;
+            this.mFactory.setListener(mListener);
+        }
+
+        public final void setFailureContent(String content) {
+            mFactory.setFailureContent(content);
+        }
+
+        public final void setLoadingContent(String content) {
+            mFactory.setLoadingContent(content);
+        }
+
+        public final OnRetryListener getListener() {
+            return mListener;
+        }
+
+        public final AbstractStateViewFactory getFactory() {
+            return mFactory;
+        }
+
     }
 
-    interface StateViewFactory {
+    static abstract class AbstractStateViewFactory implements StateViewFactory {
 
-        String DEFAULT_LOADING_CONTENT = "正在加载中...";
-        String DEFAULT_FAILURE_CONTENT = "加载失败,点击屏幕重试!";
-        String DEFAULT_NO_NET_CONTENT = "无可用网络连接,点击屏幕重试!";
+        static final String DEFAULT_LOADING_CONTENT = "正在加载中...";
+        static final String DEFAULT_FAILURE_CONTENT = "加载失败,点击屏幕重试!";
+        static final String DEFAULT_NO_NET_CONTENT = "无可用网络连接,点击屏幕重试!";
 
-        ViewGroup onCreateLoadingView(LayoutInflater inflater, ViewGroup container);
-
-        ViewGroup onCreateFailureView(LayoutInflater inflater, ViewGroup container);
-    }
-
-    static class LocalStateViewFactory implements StateViewFactory {
-
-        private String mFailureContent;
         private String mLoadingContent;
+        private String mFailureContent;
         private OnRetryListener mListener;
 
-        LocalStateViewFactory(OnRetryListener listener) {
-            this.mListener = listener;
-        }
-
-        final void setFailureContent(String content) {
-            if (!TextUtils.isEmpty(content)) {
-                this.mFailureContent = content;
-            }
-        }
-
-        final void setLoadingContent(String content) {
+        void setLoadingContent(String content) {
             if (!TextUtils.isEmpty(content)) {
                 this.mLoadingContent = content;
             }
         }
 
-        final OnRetryListener getListener() {
+        void setFailureContent(String content) {
+            if (!TextUtils.isEmpty(content)) {
+                this.mFailureContent = content;
+            }
+        }
+
+        String getLoadingContent() {
+            return mLoadingContent;
+        }
+
+        String getFailureContent() {
+            return mFailureContent;
+        }
+
+        void setListener(OnRetryListener listener) {
+            this.mListener = listener;
+        }
+
+        OnRetryListener getListener() {
             return mListener;
         }
 
+    }
+
+    static class BackgroundStateViewFactory extends AbstractStateViewFactory {
+
         @Override
         public ViewGroup onCreateLoadingView(LayoutInflater inflater, ViewGroup container) {
-            return SimpleFactory.createStateView(inflater, container, TextUtils.isEmpty(mLoadingContent) ? DEFAULT_LOADING_CONTENT : mLoadingContent);
+            String content = getLoadingContent();
+            content = TextUtils.isEmpty(content) ? DEFAULT_LOADING_CONTENT : content;
+            return SimpleFactory.createStateView(inflater, container, content);
         }
 
         @Override
         public ViewGroup onCreateFailureView(LayoutInflater inflater, ViewGroup container) {
-            ViewGroup child = SimpleFactory.createStateView(inflater, container, TextUtils.isEmpty(mFailureContent) ? DEFAULT_FAILURE_CONTENT : mFailureContent);
+            String content = getFailureContent();
+            content = TextUtils.isEmpty(content) ? DEFAULT_FAILURE_CONTENT : content;
+            ViewGroup child = SimpleFactory.createStateView(inflater, container, content);
             child.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -542,13 +520,8 @@ public abstract class BaseFragment<T> extends Fragment {
 
     }
 
-    static class OnlineStateViewFactory extends LocalStateViewFactory {
-
+    static class NetStateViewFactory extends BackgroundStateViewFactory {
         private String mNoNetContent;
-
-        public OnlineStateViewFactory(OnRetryListener listener) {
-            super(listener);
-        }
 
         public final void setNoNetContent(String content) {
             if (!TextUtils.isEmpty(content)) {
@@ -557,9 +530,10 @@ public abstract class BaseFragment<T> extends Fragment {
         }
 
         public ViewGroup onCreateNoNetView(LayoutInflater inflater, ViewGroup container) {
-            return SimpleFactory.createStateView(inflater, container, TextUtils.isEmpty(mNoNetContent) ? DEFAULT_NO_NET_CONTENT : mNoNetContent);
+            String content = mNoNetContent;
+            content = TextUtils.isEmpty(content) ? DEFAULT_NO_NET_CONTENT : content;
+            return SimpleFactory.createStateView(inflater, container, content);
         }
-
     }
 
 }

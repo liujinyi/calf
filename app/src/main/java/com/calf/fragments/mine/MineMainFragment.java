@@ -41,7 +41,7 @@ public class MineMainFragment extends BaseFragment<String> {
 
     @Override
     protected Behavior<String> onBehaviorSetup() {
-        LocalBehavior behavior = new LocalBehavior() {
+        BackgroundBehavior behavior = new BackgroundBehavior() {
             @Override
             public String onBackgroundLoading() throws Exception {
                 Thread.sleep(1000);
