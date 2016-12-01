@@ -43,7 +43,7 @@ public class MineMainFragment extends BaseFragment<String> {
     protected Behavior<String> onBehaviorSetup() {
         BackgroundBehavior behavior = new BackgroundBehavior() {
             @Override
-            public String onBackgroundLoading() throws Exception {
+            protected String onBackgroundLoading() throws Exception {
                 Thread.sleep(1000);
                 return "我的详情页,来自本地行为";
             }

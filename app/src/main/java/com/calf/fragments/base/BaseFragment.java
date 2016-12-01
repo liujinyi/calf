@@ -349,8 +349,12 @@ public abstract class BaseFragment<T> extends Fragment {
 
     }
 
-    protected interface OnRetryListener {
-        void onRetry();
+    protected abstract class Behavior<T> {
+
+        protected abstract ViewGroup onCreateStateView(int state);
+
+        protected abstract void doInBackground(Bundle savedInstanceState);
+
     }
 
     protected interface Callback<T> {
@@ -361,65 +365,11 @@ public abstract class BaseFragment<T> extends Fragment {
 
     }
 
-    protected interface Behavior<T> {
-
-        ViewGroup onCreateStateView(int state);
-
-        void doInBackground(Bundle savedInstanceState);
-
+    protected interface OnRetryListener {
+        void onRetry();
     }
 
-    protected abstract class BackgroundBehavior extends AbstractBehavior {
-
-        protected BackgroundBehavior() {
-            super(new BackgroundStateViewFactory());
-        }
-
-        @Override
-        public final ViewGroup onCreateStateView(int state) {
-            switch (state) {
-                case STATE_LOADING:
-                    return getFactory().onCreateLoadingView(getLayoutInflater(), getContentContainer());
-                case STATE_FAILURE:
-                    return getFactory().onCreateFailureView(getLayoutInflater(), getContentContainer());
-                default:
-                    return null;
-            }
-        }
-
-        @Override
-        public final void doInBackground(final Bundle savedInstanceState) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mCallback.onState(STATE_LOADING, "start onBackgroundLoading");
-                        mCallback.onSuccess(onBackgroundLoading(), savedInstanceState);
-                    } catch (Exception e) {
-                        Logger.printStackTrace(e);
-                        mCallback.onState(STATE_FAILURE, e.getMessage());
-                    }
-                }
-            }).start();
-        }
-
-        public abstract T onBackgroundLoading() throws Exception;
-
-    }
-
-    protected abstract class NetBehavior extends AbstractBehavior {
-
-        protected NetBehavior() {
-            super(new NetStateViewFactory());
-        }
-
-        abstract String giveMeUrl();
-
-        abstract T onBackgroundParser(String message);
-
-    }
-
-    protected abstract class AbstractBehavior implements Behavior<T> {
+    protected abstract class AbstractBehavior extends Behavior<T> {
 
         private OnRetryListener mListener;
         private AbstractStateViewFactory mFactory;
@@ -449,9 +399,59 @@ public abstract class BaseFragment<T> extends Fragment {
             return mListener;
         }
 
-        public final AbstractStateViewFactory getFactory() {
+        protected final AbstractStateViewFactory getFactory() {
             return mFactory;
         }
+
+    }
+
+    protected abstract class BackgroundBehavior extends AbstractBehavior {
+
+        protected BackgroundBehavior() {
+            super(new BackgroundStateViewFactory());
+        }
+
+        @Override
+        protected ViewGroup onCreateStateView(int state) {
+            switch (state) {
+                case STATE_LOADING:
+                    return getFactory().onCreateLoadingView(getLayoutInflater(), getContentContainer());
+                case STATE_FAILURE:
+                    return getFactory().onCreateFailureView(getLayoutInflater(), getContentContainer());
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        protected void doInBackground(final Bundle savedInstanceState) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mCallback.onState(STATE_LOADING, "start onBackgroundLoading");
+                        mCallback.onSuccess(onBackgroundLoading(), savedInstanceState);
+                    } catch (Exception e) {
+                        Logger.printStackTrace(e);
+                        mCallback.onState(STATE_FAILURE, e.getMessage());
+                    }
+                }
+            }).start();
+        }
+
+        protected abstract T onBackgroundLoading() throws Exception;
+
+    }
+
+    protected abstract class NetBehavior extends AbstractBehavior {
+
+        protected NetBehavior() {
+            super(new NetStateViewFactory());
+        }
+
+        protected abstract String giveMeUrl();
+
+        protected abstract T onBackgroundParser(String message);
 
     }
 
@@ -534,6 +534,7 @@ public abstract class BaseFragment<T> extends Fragment {
             content = TextUtils.isEmpty(content) ? DEFAULT_NO_NET_CONTENT : content;
             return SimpleFactory.createStateView(inflater, container, content);
         }
+
     }
 
 }
