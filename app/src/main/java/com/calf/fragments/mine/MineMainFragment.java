@@ -44,9 +44,12 @@ public class MineMainFragment extends BaseFragment<String> {
         LocalBehavior behavior = new LocalBehavior() {
             @Override
             public String onBackgroundLoading() throws Exception {
+                Thread.sleep(1000);
                 return "我的详情页,来自本地行为";
             }
         };
+        behavior.setLoadingContent("本地加载中...");
         return behavior;
     }
+
 }

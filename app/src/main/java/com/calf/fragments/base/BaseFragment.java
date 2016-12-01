@@ -43,8 +43,8 @@ public abstract class BaseFragment<T> extends Fragment {
     private boolean mHasOnCreateContentView;
 
     private T t;
-    private Behavior mBehavior;
     private Callback<T> mCallback;
+    private Behavior<T> mBehavior;
     private Bundle mSavedInstanceState;
 
     private ViewGroup mRootContainer;
@@ -60,12 +60,12 @@ public abstract class BaseFragment<T> extends Fragment {
         if (mBehavior != null) {
             mCallback = new Callback<T>() {
                 @Override
-                public void onState(final int state, final String message) {
+                public void onState(int state, String message) {
                     showStateView(state, mBehavior, message);
                 }
 
                 @Override
-                public void onSuccess(final T t, final Bundle savedInstanceState) {
+                public void onSuccess(T t, Bundle savedInstanceState) {
                     BaseFragment.this.t = t;
                     showContentView(savedInstanceState, t);
                 }
@@ -114,9 +114,9 @@ public abstract class BaseFragment<T> extends Fragment {
     @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         this.mSavedInstanceState = savedInstanceState;
-        this.mRootContainer = (ViewGroup) inflater.inflate(R.layout.fragment_base, container, false);
-        this.mTitleContainer = (FrameLayout) mRootContainer.findViewById(R.id.title_container);
-        this.mContentContainer = (FrameLayout) mRootContainer.findViewById(R.id.content_container);
+        this.mRootContainer = (ViewGroup) inflater.inflate(com.calf.player.R.layout.fragment_base, container, false);
+        this.mTitleContainer = (FrameLayout) mRootContainer.findViewById(com.calf.player.R.id.title_container);
+        this.mContentContainer = (FrameLayout) mRootContainer.findViewById(com.calf.player.R.id.content_container);
         if (isShowTitleContainer()) {
             ViewGroup titleContainer = onCreateTitleView(inflater, mTitleContainer);
             if (titleContainer != null) {
@@ -166,7 +166,7 @@ public abstract class BaseFragment<T> extends Fragment {
         this.t = t;
     }
 
-    protected Behavior onBehaviorSetup() {
+    protected Behavior<T> onBehaviorSetup() {
         return null;
     }
 
@@ -245,8 +245,8 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     protected ViewGroup onCreateTitleView(LayoutInflater inflater, ViewGroup container) {
-        ViewGroup child = (ViewGroup) inflater.inflate(R.layout.layout_common_title, container, false);
-        Toolbar toolbar = (Toolbar) child.findViewById(R.id.common_toolbar);
+        ViewGroup child = (ViewGroup) inflater.inflate(com.calf.player.R.layout.layout_common_title, container, false);
+        Toolbar toolbar = (Toolbar) child.findViewById(com.calf.player.R.id.common_toolbar);
         toolbar.setNavigationIcon(R.drawable.selector_common_back);
         onToolBarSetup(toolbar);
         setHasOptionsMenu(true);
@@ -352,7 +352,7 @@ public abstract class BaseFragment<T> extends Fragment {
 
     }
 
-    interface Callback<T> {
+    protected interface Callback<T> {
 
         void onState(int state, String message);
 
@@ -442,45 +442,45 @@ public abstract class BaseFragment<T> extends Fragment {
         }
     }
 
-    protected abstract class OnlineBehavior implements Behavior<T> {
-
-        public abstract String giveMeUrl();
-
-        public abstract T onBackgroundParser(String data);
-
-        private ViewGroup mContainer;
-        private Callback<T> mCallback;
-        private LayoutInflater mInflater;
-        private OnRetryListener mListener;
-        private Bundle mSavedInstanceState;
-        private OnlineStateViewFactory mFactory;
-
-        protected OnlineBehavior() {
-            this.mListener = new OnRetryListener() {
-                @Override
-                public void onRetry() {
-                    if (mCallback != null) {
-                        doInBackground(mSavedInstanceState);
-                    }
-                }
-            };
-        }
-
-        @Override
-        public final ViewGroup onCreateStateView(int state) {
-            switch (state) {
-                case STATE_NO_NET:
-                    return mFactory.onCreateNoNetView(mInflater, mContainer);
-                case STATE_LOADING:
-                    return mFactory.onCreateLoadingView(mInflater, mContainer);
-                case STATE_FAILURE:
-                    return mFactory.onCreateFailureView(mInflater, mContainer);
-                default:
-                    return null;
-            }
-        }
-
-    }
+//    protected abstract class OnlineBehavior implements Behavior<T> {
+//
+//        public abstract String giveMeUrl();
+//
+//        public abstract T onBackgroundParser(String data);
+//
+//        private ViewGroup mContainer;
+//        private Callback<T> mCallback;
+//        private LayoutInflater mInflater;
+//        private OnRetryListener mListener;
+//        private Bundle mSavedInstanceState;
+//        private OnlineStateViewFactory mFactory;
+//
+//        protected OnlineBehavior() {
+//            this.mListener = new OnRetryListener() {
+//                @Override
+//                public void onRetry() {
+//                    if (mCallback != null) {
+//                        doInBackground(mSavedInstanceState);
+//                    }
+//                }
+//            };
+//        }
+//
+//        @Override
+//        public final ViewGroup onCreateStateView(int state) {
+//            switch (state) {
+//                case STATE_NO_NET:
+//                    return mFactory.onCreateNoNetView(mInflater, mContainer);
+//                case STATE_LOADING:
+//                    return mFactory.onCreateLoadingView(mInflater, mContainer);
+//                case STATE_FAILURE:
+//                    return mFactory.onCreateFailureView(mInflater, mContainer);
+//                default:
+//                    return null;
+//            }
+//        }
+//
+//    }
 
     protected interface OnRetryListener {
         void onRetry();
