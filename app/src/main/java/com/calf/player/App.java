@@ -3,9 +3,7 @@ package com.calf.player;
 import android.app.Application;
 
 import com.calf.frame.FrameCore;
-import com.calf.frame.tool.Assert;
-import com.calf.frame.log.Logger;
-import com.calf.frame.message.MessageManager;
+import com.calf.player.manager.FolderManager;
 
 /**
  * Created by JinYi Liu on 16-7-26.
@@ -16,5 +14,6 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         FrameCore.init();
+        FolderManager.init(this);
     }
 }

@@ -123,9 +123,6 @@ public abstract class BaseFragment<T> extends Fragment {
                 mTitleContainer.addView(titleContainer);
             }
         }
-//        if (mBehavior != null) {
-//            mBehavior.initBehavior(inflater, mContentContainer, mCallback);
-//        }
         handlerPreloadInViewPager(savedInstanceState);
         this.mHasOnCreateView = true;
         return this.mRootContainer;
@@ -227,11 +224,9 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     protected void beforeOnCreateStateView(int state) {
-
     }
 
     protected void beforeOnCreateContentView() {
-
     }
 
     protected void afterOnCreateStateView(int state, String message) {
@@ -241,7 +236,6 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     protected void afterOnCreateContentView(T t) {
-
     }
 
     protected ViewGroup onCreateTitleView(LayoutInflater inflater, ViewGroup container) {
@@ -349,6 +343,10 @@ public abstract class BaseFragment<T> extends Fragment {
 
     }
 
+    protected interface StringDecoder {
+        String decode(String data);
+    }
+
     protected abstract class Behavior<T> {
 
         protected abstract ViewGroup onCreateStateView(int state);
@@ -369,12 +367,12 @@ public abstract class BaseFragment<T> extends Fragment {
         void onRetry();
     }
 
-    protected abstract class AbstractBehavior extends Behavior<T> {
+    abstract class AbstractBehavior extends Behavior<T> {
 
         private OnRetryListener mListener;
         private AbstractStateViewFactory mFactory;
 
-        protected AbstractBehavior(AbstractStateViewFactory factory) {
+        AbstractBehavior(AbstractStateViewFactory factory) {
             this.mListener = new OnRetryListener() {
                 @Override
                 public void onRetry() {
@@ -445,13 +443,36 @@ public abstract class BaseFragment<T> extends Fragment {
 
     protected abstract class NetBehavior extends AbstractBehavior {
 
+        private int mCacheMinute;
+        private String mCacheRoot;
+        private StringDecoder mDecoder;
+
         protected NetBehavior() {
             super(new NetStateViewFactory());
         }
 
+        @Override
+        protected ViewGroup onCreateStateView(int state) {
+            switch (state) {
+                case STATE_LOADING:
+                    return getFactory().onCreateLoadingView(getLayoutInflater(), getContentContainer());
+                case STATE_FAILURE:
+                    return getFactory().onCreateFailureView(getLayoutInflater(), getContentContainer());
+                case STATE_NO_NET:
+                    return ((NetStateViewFactory) getFactory()).onCreateNoNetView(getLayoutInflater(), getContentContainer());
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        protected void doInBackground(Bundle savedInstanceState) {
+
+        }
+
         protected abstract String giveMeUrl();
 
-        protected abstract T onBackgroundParser(String message);
+        protected abstract T onBackgroundParser(String data);
 
     }
 
@@ -521,6 +542,7 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     static class NetStateViewFactory extends BackgroundStateViewFactory {
+
         private String mNoNetContent;
 
         public final void setNoNetContent(String content) {

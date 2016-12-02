@@ -1,4 +1,4 @@
-package com.calf.frame.storage;
+package com.calf.player.manager;
 
 import android.content.Context;
 
@@ -9,7 +9,7 @@ import java.io.File;
 /**
  * @author JinYi Liu
  */
-public class FolderHelper {
+public class FolderManager {
 
     public static final String SEPARATOR = File.separator;
     public static final int TYPE_ROOT = 0;
@@ -25,7 +25,7 @@ public class FolderHelper {
 
     public static void init(Context context) {
         if (context == null) {
-            throw new NullPointerException("FolderHelper [init] context is null");
+            throw new NullPointerException("FolderManager [init] context is null");
         }
         if (mInit) {
             return;
@@ -39,14 +39,14 @@ public class FolderHelper {
 
     public static String getCachePathRoot() {
         if (!mInit) {
-            throw new IllegalStateException("FolderHelper [getCachePathRoot] mInit is false ");
+            throw new IllegalStateException("FolderManager [getCachePathRoot] mInit is false ");
         }
         return mCachePathRoot;
     }
 
     public static String getFolderPath(int folderType) {
         if (!mInit) {
-            throw new IllegalStateException("FolderHelper [getFolderPath] mInit is false ");
+            throw new IllegalStateException("FolderManager [getFolderPath] mInit is false ");
         }
         String path = null;
         switch (folderType) {
@@ -69,7 +69,7 @@ public class FolderHelper {
                 path = FileUtils.getExternalStorageMusicDirectory().getAbsolutePath();
                 break;
             default:
-                throw new RuntimeException("FolderHelper [getFolderPath] folderType undefined");
+                throw new RuntimeException("FolderManager [getFolderPath] folderType undefined");
         }
         File file = new File(path);
         if (!file.exists()) {
