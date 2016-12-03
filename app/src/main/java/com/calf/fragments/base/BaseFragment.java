@@ -16,6 +16,7 @@ import android.widget.FrameLayout;
 import com.calf.factory.SimpleFactory;
 import com.calf.frame.log.Logger;
 import com.calf.frame.message.MessageManager;
+import com.calf.frame.tool.Assert;
 import com.calf.player.R;
 import com.calf.player.manager.MainFragmentManager;
 
@@ -56,7 +57,8 @@ public abstract class BaseFragment<T> extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBehavior = onBehaviorSetup();
+        this.mBehavior = onBehaviorSetup();
+        this.mSavedInstanceState = savedInstanceState;
         if (mBehavior != null) {
             mCallback = new Callback<T>() {
                 @Override
@@ -113,7 +115,6 @@ public abstract class BaseFragment<T> extends Fragment {
 
     @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        this.mSavedInstanceState = savedInstanceState;
         this.mRootContainer = (ViewGroup) inflater.inflate(com.calf.player.R.layout.fragment_base, container, false);
         this.mTitleContainer = (FrameLayout) mRootContainer.findViewById(com.calf.player.R.id.title_container);
         this.mContentContainer = (FrameLayout) mRootContainer.findViewById(com.calf.player.R.id.content_container);
@@ -122,6 +123,9 @@ public abstract class BaseFragment<T> extends Fragment {
             if (titleContainer != null) {
                 mTitleContainer.addView(titleContainer);
             }
+        }
+        if (mBehavior != null) {
+            mBehavior.init(savedInstanceState, mCallback, inflater, container);
         }
         handlerPreloadInViewPager(savedInstanceState);
         this.mHasOnCreateView = true;
@@ -347,14 +351,6 @@ public abstract class BaseFragment<T> extends Fragment {
         String decode(String data);
     }
 
-    protected abstract class Behavior<T> {
-
-        protected abstract ViewGroup onCreateStateView(int state);
-
-        protected abstract void doInBackground(Bundle savedInstanceState);
-
-    }
-
     protected interface Callback<T> {
 
         void onState(int state, String message);
@@ -367,12 +363,16 @@ public abstract class BaseFragment<T> extends Fragment {
         void onRetry();
     }
 
-    abstract class AbstractBehavior extends Behavior<T> {
+    protected static abstract class Behavior<T> {
 
+        private ViewGroup mContainer;
+        private Callback<T> mCallback;
+        private LayoutInflater mInflater;
         private OnRetryListener mListener;
+        private Bundle mSavedInstanceState;
         private AbstractStateViewFactory mFactory;
 
-        AbstractBehavior(AbstractStateViewFactory factory) {
+        public Behavior(AbstractStateViewFactory factory) {
             this.mListener = new OnRetryListener() {
                 @Override
                 public void onRetry() {
@@ -383,6 +383,28 @@ public abstract class BaseFragment<T> extends Fragment {
             };
             this.mFactory = factory;
             this.mFactory.setListener(mListener);
+        }
+
+        protected Callback<T> getCallback() {
+            return mCallback;
+        }
+
+        protected final ViewGroup getContainer() {
+            return mContainer;
+        }
+
+        protected final LayoutInflater getInflater() {
+            return mInflater;
+        }
+
+        final void init(Bundle saveInstanceState, Callback<T> callback, LayoutInflater inflater, ViewGroup container) {
+            if (callback == null || inflater == null || container == null) {
+                Assert.classAssert(false, "Behavior [init] parameter is null");
+            }
+            this.mCallback = callback;
+            this.mInflater = inflater;
+            this.mContainer = container;
+            this.mSavedInstanceState = saveInstanceState;
         }
 
         public final void setFailureContent(String content) {
@@ -401,78 +423,9 @@ public abstract class BaseFragment<T> extends Fragment {
             return mFactory;
         }
 
-    }
+        protected abstract ViewGroup onCreateStateView(int state);
 
-    protected abstract class BackgroundBehavior extends AbstractBehavior {
-
-        protected BackgroundBehavior() {
-            super(new BackgroundStateViewFactory());
-        }
-
-        @Override
-        protected ViewGroup onCreateStateView(int state) {
-            switch (state) {
-                case STATE_LOADING:
-                    return getFactory().onCreateLoadingView(getLayoutInflater(), getContentContainer());
-                case STATE_FAILURE:
-                    return getFactory().onCreateFailureView(getLayoutInflater(), getContentContainer());
-                default:
-                    return null;
-            }
-        }
-
-        @Override
-        protected void doInBackground(final Bundle savedInstanceState) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mCallback.onState(STATE_LOADING, "start onBackgroundLoading");
-                        mCallback.onSuccess(onBackgroundLoading(), savedInstanceState);
-                    } catch (Exception e) {
-                        Logger.printStackTrace(e);
-                        mCallback.onState(STATE_FAILURE, e.getMessage());
-                    }
-                }
-            }).start();
-        }
-
-        protected abstract T onBackgroundLoading() throws Exception;
-
-    }
-
-    protected abstract class NetBehavior extends AbstractBehavior {
-
-        private int mCacheMinute;
-        private String mCacheRoot;
-        private StringDecoder mDecoder;
-
-        protected NetBehavior() {
-            super(new NetStateViewFactory());
-        }
-
-        @Override
-        protected ViewGroup onCreateStateView(int state) {
-            switch (state) {
-                case STATE_LOADING:
-                    return getFactory().onCreateLoadingView(getLayoutInflater(), getContentContainer());
-                case STATE_FAILURE:
-                    return getFactory().onCreateFailureView(getLayoutInflater(), getContentContainer());
-                case STATE_NO_NET:
-                    return ((NetStateViewFactory) getFactory()).onCreateNoNetView(getLayoutInflater(), getContentContainer());
-                default:
-                    return null;
-            }
-        }
-
-        @Override
-        protected void doInBackground(Bundle savedInstanceState) {
-
-        }
-
-        protected abstract String giveMeUrl();
-
-        protected abstract T onBackgroundParser(String data);
+        protected abstract void doInBackground(Bundle savedInstanceState);
 
     }
 

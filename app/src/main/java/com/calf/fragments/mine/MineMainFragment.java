@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.calf.fragments.base.BackgroundBehavior;
 import com.calf.fragments.base.BaseFragment;
 import com.calf.player.R;
 
