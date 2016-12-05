@@ -347,10 +347,6 @@ public abstract class BaseFragment<T> extends Fragment {
 
     }
 
-    protected interface StringDecoder {
-        String decode(String data);
-    }
-
     protected interface Callback<T> {
 
         void onState(int state, String message);
@@ -361,6 +357,10 @@ public abstract class BaseFragment<T> extends Fragment {
 
     protected interface OnRetryListener {
         void onRetry();
+    }
+
+    protected interface Decoder {
+        byte[] decode(byte[] bytes);
     }
 
     protected static abstract class Behavior<T> {
