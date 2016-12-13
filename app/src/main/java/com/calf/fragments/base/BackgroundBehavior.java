@@ -28,7 +28,10 @@ public abstract class BackgroundBehavior<T> extends BaseFragment.Behavior {
 
     protected abstract T onBackgroundLoading() throws Exception;
 
-    private static class BackgroundTask implements Runnable {
+    private static class BackgroundTask extends BaseTask {
+
+        public BackgroundTask() {
+        }
 
         @Override
         public void run() {

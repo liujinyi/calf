@@ -12,7 +12,7 @@ public class OnlineTask implements Runnable {
     private int mCacheMinutes;
     private String mCachePath;
     private final AtomicBoolean mAlive;
-    private BaseFragment.Decoder mDecoder;
+    private NetBehavior.Decoder mDecoder;
 
     public void cancel() {
         mAlive.set(false);
