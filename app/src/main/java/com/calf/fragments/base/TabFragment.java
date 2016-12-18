@@ -10,7 +10,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.calf.fragments.BlankFragment;
-import com.calf.fragments.online.RecommendFragment;
+import com.calf.fragments.library.LibraryRecommendFragment;
 import com.calf.player.R;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class TabFragment extends BaseFragment {
         public TabAdapter(FragmentManager fm) {
             super(fm);
             mFragments = new ArrayList<>(6);
-            mFragments.add(new RecommendFragment());
+            mFragments.add(new LibraryRecommendFragment());
             mFragments.add(BlankFragment.newInstance("歌手详情页"));
             mFragments.add(BlankFragment.newInstance("MV详情页"));
             mFragments.add(BlankFragment.newInstance("排行榜详情页"));

@@ -20,6 +20,8 @@ import com.calf.frame.tool.Assert;
 import com.calf.player.R;
 import com.calf.player.manager.MainFragmentManager;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Created by JinYi Liu on 16-11-12.
  */
@@ -71,7 +73,6 @@ public abstract class BaseFragment<T> extends Fragment {
 
                 @Override
                 public void onSuccess(T t, Bundle savedInstanceState) {
-                    BaseFragment.this.t = t;
                     showContentView(savedInstanceState, t);
                 }
             };
@@ -309,7 +310,14 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     protected ViewGroup onCreateNoNetView(LayoutInflater inflater, ViewGroup container) {
-        return SimpleFactory.createStateView(inflater, container, getNoNetContent());
+        ViewGroup child = SimpleFactory.createStateView(inflater, container, getNoNetContent());
+        child.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onRetry();
+            }
+        });
+        return child;
     }
 
     protected ViewGroup onCreateEmptyView(LayoutInflater inflater, ViewGroup container) {
@@ -359,14 +367,23 @@ public abstract class BaseFragment<T> extends Fragment {
         MessageManager.post(new Runnable() {
             @Override
             public void run() {
-                if (isFragmentAlive() && !mHasOnCreateContentView) {
+                if (isFragmentAlive() && isCanShowContentView()) {
                     beforeOnCreateContentView();
                     addContentView(onCreateContentView(getLayoutInflater(), mContentContainer, savedInstanceState, t));
                     mHasOnCreateContentView = true;
                     afterOnCreateContentView(t);
+                    BaseFragment.this.t = t;
                 }
             }
         });
+    }
+
+    private boolean isCanShowContentView() {
+        boolean flag = false;
+        if ((mCurrentState == State.INIT || mCurrentState == State.LOADING) && !mHasOnCreateContentView) {
+            flag = true;
+        }
+        return flag;
     }
 
     private void handlerPreloadInViewPager(Bundle savedInstanceState) {
@@ -406,11 +423,13 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     protected interface Callback<T> {
-
         void onState(State state, String message);
 
         void onSuccess(T t, Bundle savedInstanceState);
+    }
 
+    protected interface Decoder {
+        byte[] decode(byte[] bytes);
     }
 
     protected static abstract class Behavior<T> {
@@ -441,6 +460,24 @@ public abstract class BaseFragment<T> extends Fragment {
         }
 
         protected abstract void doInBackground(Bundle savedInstanceState);
+
+    }
+
+    protected static abstract class BaseBehaviorTask implements Runnable {
+
+        private final AtomicBoolean mAlive;
+
+        public BaseBehaviorTask() {
+            this.mAlive = new AtomicBoolean(true);
+        }
+
+        public final void cancel() {
+            mAlive.set(false);
+        }
+
+        public final boolean isAlive() {
+            return mAlive.get();
+        }
 
     }
 

@@ -7,8 +7,7 @@ import android.widget.TextView;
 import com.calf.fragments.base.BaseFragment;
 import com.calf.fragments.discover.DiscoverMainFragment;
 import com.calf.fragments.mine.MineMainFragment;
-import com.calf.fragments.online.OnlineMainFragment;
-import com.calf.fragments.search.SearchMainFragment;
+import com.calf.fragments.library.LibraryMainFragment;
 import com.calf.player.R;
 
 /**
@@ -24,7 +23,7 @@ public class SimpleFactory {
                 f = MineMainFragment.newInstance();
                 break;
             case 1:
-                f = OnlineMainFragment.newInstance();
+                f = LibraryMainFragment.newInstance();
                 break;
             case 2:
                 f = DiscoverMainFragment.newInstance();

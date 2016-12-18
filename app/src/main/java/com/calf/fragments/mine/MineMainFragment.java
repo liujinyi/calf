@@ -49,6 +49,7 @@ public class MineMainFragment extends BaseFragment<String> {
                 return "我的详情页,来自本地行为";
             }
         };
+        behavior.useNetCallback();
         setLoadingContent("本地加载中...");
         return behavior;
     }

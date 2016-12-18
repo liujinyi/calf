@@ -3,6 +3,7 @@ package com.calf.fragments.base;
 import android.os.Bundle;
 
 import com.calf.frame.log.Logger;
+import com.calf.frame.utils.NetworkUtils;
 
 /**
  * Created by JinYi Liu on 16-12-3.
@@ -10,35 +11,62 @@ import com.calf.frame.log.Logger;
 
 public abstract class BackgroundBehavior<T> extends BaseFragment.Behavior {
 
-    @Override
-    protected void doInBackground(final Bundle savedInstanceState) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    getCallback().onState(BaseFragment.State.LOADING, "start onBackgroundLoading");
-                    getCallback().onSuccess(onBackgroundLoading(), savedInstanceState);
-                } catch (Exception e) {
-                    Logger.printStackTrace(e);
-                    getCallback().onState(BaseFragment.State.FAILURE, e.getMessage());
-                }
-            }
-        }).start();
-    }
+    protected boolean mUseNetCallback;
+    private BackgroundTask mBackgroundTask;
+    private BaseFragment.State mCurrentState;
 
     protected abstract T onBackgroundLoading() throws Exception;
 
-    private static class BackgroundTask extends BaseTask {
+    public void useNetCallback() {
+        this.mUseNetCallback = true;
+    }
 
-        public BackgroundTask() {
+    protected void handlerStateCallback(BaseFragment.Callback<T> callback) {
+        if (mUseNetCallback) {
+            if (NetworkUtils.isAvailable(getContainer().getContext())) {
+                callback.onState(BaseFragment.State.LOADING, "BackgroundBehavior begin loading");
+                mCurrentState = BaseFragment.State.LOADING;
+            } else {
+                callback.onState(BaseFragment.State.NO_NET, "BackgroundBehavior no net");
+                mCurrentState = BaseFragment.State.NO_NET;
+            }
+        } else {
+            callback.onState(BaseFragment.State.LOADING, "BackgroundBehavior begin loading");
+            mCurrentState = BaseFragment.State.LOADING;
+        }
+    }
+
+    @Override
+    protected void doInBackground(Bundle savedInstanceState) {
+        if (mBackgroundTask != null && mBackgroundTask.isAlive()) {
+            // is in background loading
+        } else {
+            mBackgroundTask = new BackgroundTask(savedInstanceState);
+            new Thread(mBackgroundTask).start();
+        }
+    }
+
+    private class BackgroundTask extends BaseFragment.BaseBehaviorTask {
+
+        private Bundle mSavedInstanceState;
+
+        public BackgroundTask(Bundle savedInstanceState) {
+            super();
+            this.mSavedInstanceState = savedInstanceState;
         }
 
         @Override
         public void run() {
-
+            try {
+                handlerStateCallback(getCallback());
+                if (mCurrentState == BaseFragment.State.LOADING) {
+                    getCallback().onSuccess(onBackgroundLoading(), mSavedInstanceState);
+                }
+            } catch (Exception e) {
+                Logger.printStackTrace(e);
+                getCallback().onState(BaseFragment.State.FAILURE, e.getMessage());
+            }
         }
-
     }
-
 
 }

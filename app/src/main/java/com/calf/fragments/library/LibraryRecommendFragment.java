@@ -1,4 +1,4 @@
-package com.calf.fragments.online;
+package com.calf.fragments.library;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,11 +13,11 @@ import com.calf.player.R;
  * Created by JinYi Liu on 16-11-12.
  */
 
-public class RecommendFragment extends BaseFragment<OnlineInfo> {
+public class LibraryRecommendFragment extends BaseFragment<OnlineInfo> {
 
     @Override
     protected ViewGroup onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, OnlineInfo o) {
-        ViewGroup child = (ViewGroup) inflater.inflate(R.layout.fragment_recommend, container, false);
+        ViewGroup child = (ViewGroup) inflater.inflate(R.layout.fragment_library_recommend, container, false);
         TextView textView = (TextView) child.findViewById(R.id.section_label);
         if (savedInstanceState != null) {
             textView.setText(savedInstanceState.getString(getSimpleName()));
