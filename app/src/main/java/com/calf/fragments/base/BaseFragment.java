@@ -466,17 +466,27 @@ public abstract class BaseFragment<T> extends Fragment {
     protected static abstract class BaseBehaviorTask implements Runnable {
 
         private final AtomicBoolean mAlive;
+        private final AtomicBoolean mCancel;
 
         public BaseBehaviorTask() {
             this.mAlive = new AtomicBoolean(true);
+            this.mCancel = new AtomicBoolean(false);
+        }
+
+        public final void die() {
+            this.mAlive.set(false);
         }
 
         public final void cancel() {
-            mAlive.set(false);
+            this.mCancel.set(true);
         }
 
         public final boolean isAlive() {
             return mAlive.get();
+        }
+
+        public final boolean isCancel() {
+            return mCancel.get();
         }
 
     }

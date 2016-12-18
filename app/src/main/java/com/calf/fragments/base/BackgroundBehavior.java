@@ -51,7 +51,6 @@ public abstract class BackgroundBehavior<T> extends BaseFragment.Behavior {
         private Bundle mSavedInstanceState;
 
         public BackgroundTask(Bundle savedInstanceState) {
-            super();
             this.mSavedInstanceState = savedInstanceState;
         }
 
@@ -62,6 +61,7 @@ public abstract class BackgroundBehavior<T> extends BaseFragment.Behavior {
                 if (mCurrentState == BaseFragment.State.LOADING) {
                     getCallback().onSuccess(onBackgroundLoading(), mSavedInstanceState);
                 }
+                die();
             } catch (Exception e) {
                 Logger.printStackTrace(e);
                 getCallback().onState(BaseFragment.State.FAILURE, e.getMessage());
