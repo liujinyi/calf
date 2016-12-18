@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class BaseFragment<T> extends Fragment {
 
-    private static final String TAG = "BaseFragment";
+    protected static final String TAG = "BaseFragment";
     private static final String MESSAGE_PRELOAD_VIEW = "viewpager preload view create";
     private static final String MESSAGE_SET_CURRENT_STATE = "user call setInitState method";
     private static final String DEFAULT_EMPTY_CONTENT = "暂无内容!";
@@ -66,6 +66,14 @@ public abstract class BaseFragment<T> extends Fragment {
         this.mSavedInstanceState = savedInstanceState;
         if (mBehavior != null) {
             mCallback = new Callback<T>() {
+                @Override
+                public T onBackgroundParser(String data) throws Exception {
+                    if (mBehavior instanceof NetPageBehavior) {
+                        return (T) ((NetPageBehavior) mBehavior).onBackgroundParser(data);
+                    }
+                    return null;
+                }
+
                 @Override
                 public void onState(State state, String message) {
                     showStateView(state, message);
@@ -122,7 +130,7 @@ public abstract class BaseFragment<T> extends Fragment {
         this.mRootContainer = (ViewGroup) inflater.inflate(com.calf.player.R.layout.fragment_base, container, false);
         this.mTitleContainer = (FrameLayout) mRootContainer.findViewById(com.calf.player.R.id.title_container);
         this.mContentContainer = (FrameLayout) mRootContainer.findViewById(com.calf.player.R.id.content_container);
-        if (isShowTitleContainer()) {
+        if (isDisplayTitleContainer()) {
             ViewGroup titleContainer = onCreateTitleView(inflater, mTitleContainer);
             if (titleContainer != null) {
                 mTitleContainer.addView(titleContainer);
@@ -183,7 +191,7 @@ public abstract class BaseFragment<T> extends Fragment {
         return false;
     }
 
-    protected boolean isShowTitleContainer() {
+    protected boolean isDisplayTitleContainer() {
         return getParentFragment() == null;
     }
 
@@ -367,7 +375,7 @@ public abstract class BaseFragment<T> extends Fragment {
         MessageManager.post(new Runnable() {
             @Override
             public void run() {
-                if (isFragmentAlive() && isCanShowContentView()) {
+                if (isFragmentAlive() && isCanDisplayContentView()) {
                     beforeOnCreateContentView();
                     addContentView(onCreateContentView(getLayoutInflater(), mContentContainer, savedInstanceState, t));
                     mHasOnCreateContentView = true;
@@ -378,7 +386,7 @@ public abstract class BaseFragment<T> extends Fragment {
         });
     }
 
-    private boolean isCanShowContentView() {
+    private boolean isCanDisplayContentView() {
         boolean flag = false;
         if ((mCurrentState == State.INIT || mCurrentState == State.LOADING) && !mHasOnCreateContentView) {
             flag = true;
@@ -423,6 +431,8 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     protected interface Callback<T> {
+        T onBackgroundParser(String data) throws Exception;
+
         void onState(State state, String message);
 
         void onSuccess(T t, Bundle savedInstanceState);
@@ -463,12 +473,12 @@ public abstract class BaseFragment<T> extends Fragment {
 
     }
 
-    protected static abstract class BaseBehaviorTask implements Runnable {
+    protected static abstract class BaseTask implements Runnable {
 
         private final AtomicBoolean mAlive;
         private final AtomicBoolean mCancel;
 
-        public BaseBehaviorTask() {
+        public BaseTask() {
             this.mAlive = new AtomicBoolean(true);
             this.mCancel = new AtomicBoolean(false);
         }
@@ -487,6 +497,10 @@ public abstract class BaseFragment<T> extends Fragment {
 
         public final boolean isCancel() {
             return mCancel.get();
+        }
+
+        public final boolean isCancelOrDie() {
+            return isCancel() || !isAlive();
         }
 
     }

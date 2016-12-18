@@ -6,13 +6,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.calf.fragments.base.BaseFragment;
+import com.calf.fragments.base.LibraryPageBehavior;
 import com.calf.player.R;
+import com.calf.utils.UrlFactory;
 
 /**
  * Created by JinYi Liu on 16-11-12.
  */
 
-public class LibraryMainFragment extends BaseFragment {
+public class LibraryMainFragment extends BaseFragment<String> {
 
     public static LibraryMainFragment newInstance() {
         LibraryMainFragment fragment = new LibraryMainFragment();
@@ -22,20 +24,36 @@ public class LibraryMainFragment extends BaseFragment {
     }
 
     @Override
-    protected boolean isShowTitleContainer() {
+    protected boolean isDisplayTitleContainer() {
         return false;
     }
 
     @Override
-    protected ViewGroup onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, Object o) {
+    protected ViewGroup onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState, String s) {
         ViewGroup child = (ViewGroup) inflater.inflate(R.layout.fragment_library_main, container, false);
         TextView textView = (TextView) child.findViewById(R.id.section_label);
         if (savedInstanceState != null) {
             textView.setText(savedInstanceState.getString(getSimpleName()));
         } else {
-            textView.setText("乐库详情页");
+            textView.setText(s);
         }
         return child;
     }
 
+    @Override
+    protected Behavior<String> onBehaviorSetup() {
+        LibraryPageBehavior<String> behavior = new LibraryPageBehavior() {
+            @Override
+            protected String onBackgroundParser(String data) {
+                return data;
+            }
+
+            @Override
+            protected String giveMeUrl(int start, int count) {
+                return UrlFactory.createLibraryMainUrl(count);
+            }
+        };
+        behavior.setDecoder(null);
+        return behavior;
+    }
 }

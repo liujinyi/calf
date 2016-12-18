@@ -24,7 +24,7 @@ public class MineMainFragment extends BaseFragment<String> {
     }
 
     @Override
-    protected boolean isShowTitleContainer() {
+    protected boolean isDisplayTitleContainer() {
         return false;
     }
 

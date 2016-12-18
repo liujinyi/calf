@@ -13,7 +13,6 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        FrameCore.init();
-        FolderManager.init(this);
+        Init.initInApplication(this);
     }
 }

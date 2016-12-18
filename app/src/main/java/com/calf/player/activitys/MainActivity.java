@@ -16,6 +16,7 @@ import com.calf.adapters.MainActivityTabAdapter;
 import com.calf.fragments.base.BaseFragment;
 import com.calf.fragments.search.SearchMainFragment;
 import com.calf.frame.log.Logger;
+import com.calf.player.Init;
 import com.calf.player.R;
 import com.calf.player.manager.MainFragmentManager;
 
@@ -24,8 +25,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Logger.i(TAG, mSimpleName + "[onCreate] ");
+        Init.initInMainActivity(this);
         super.onCreate(savedInstanceState);
-        MainFragmentManager.init(this);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("");

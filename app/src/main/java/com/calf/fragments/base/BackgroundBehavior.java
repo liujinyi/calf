@@ -3,7 +3,7 @@ package com.calf.fragments.base;
 import android.os.Bundle;
 
 import com.calf.frame.log.Logger;
-import com.calf.frame.utils.NetworkUtils;
+import com.calf.player.manager.NetworkManager;
 
 /**
  * Created by JinYi Liu on 16-12-3.
@@ -23,7 +23,7 @@ public abstract class BackgroundBehavior<T> extends BaseFragment.Behavior {
 
     protected void handlerStateCallback(BaseFragment.Callback<T> callback) {
         if (mUseNetCallback) {
-            if (NetworkUtils.isAvailable(getContainer().getContext())) {
+            if (NetworkManager.isAvailable()) {
                 callback.onState(BaseFragment.State.LOADING, "BackgroundBehavior begin loading");
                 mCurrentState = BaseFragment.State.LOADING;
             } else {
@@ -38,15 +38,16 @@ public abstract class BackgroundBehavior<T> extends BaseFragment.Behavior {
 
     @Override
     protected void doInBackground(Bundle savedInstanceState) {
-        if (mBackgroundTask != null && mBackgroundTask.isAlive()) {
+        if (mBackgroundTask != null && !mBackgroundTask.isCancelOrDie()) {
             // is in background loading
+            Logger.e(BaseFragment.TAG, "BackgroundBehavior [doInBackground] mBackgroundTask is loading");
         } else {
             mBackgroundTask = new BackgroundTask(savedInstanceState);
             new Thread(mBackgroundTask).start();
         }
     }
 
-    private class BackgroundTask extends BaseFragment.BaseBehaviorTask {
+    private class BackgroundTask extends BaseFragment.BaseTask {
 
         private Bundle mSavedInstanceState;
 
