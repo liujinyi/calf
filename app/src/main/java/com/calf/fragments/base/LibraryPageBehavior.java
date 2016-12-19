@@ -18,7 +18,7 @@ import okhttp3.Response;
  * Created by JinYi Liu on 16-12-18.
  */
 
-public abstract class LibraryPageBehavior<T> extends NetPageBehavior {
+public abstract class LibraryPageBehavior<T> extends BaseFragment.NetPageBehavior {
 
     public LibraryPageBehavior() {
         setCacheMillis(CacheManager.DAY);
@@ -38,12 +38,12 @@ public abstract class LibraryPageBehavior<T> extends NetPageBehavior {
 
         private String mUrl;
         private boolean mUseCache;
-        private CacheParameter mParameter;
+        private BaseFragment.CacheParameter mParameter;
         private Bundle mSavedInstanceState;
-        private HttpPageStatistics mStatistics;
+        private BaseFragment.HttpPageStatistics mStatistics;
         private BaseFragment.Callback<T> mCallback;
 
-        public LibraryPageTask(String url, CacheParameter parameter, BaseFragment.Callback<T> callback) {
+        public LibraryPageTask(String url, BaseFragment.CacheParameter parameter, BaseFragment.Callback<T> callback) {
             this.mUrl = url;
             this.mUseCache = true;
             this.mCallback = callback;
@@ -54,12 +54,12 @@ public abstract class LibraryPageBehavior<T> extends NetPageBehavior {
             this.mUseCache = useCache;
         }
 
-        public void setStatistics(HttpPageStatistics statistics) {
-            this.mStatistics = statistics;
-        }
-
         public void setSavedInstanceState(Bundle savedInstanceState) {
             this.mSavedInstanceState = savedInstanceState;
+        }
+
+        public void setStatistics(BaseFragment.HttpPageStatistics statistics) {
+            this.mStatistics = statistics;
         }
 
         @Override
@@ -133,7 +133,7 @@ public abstract class LibraryPageBehavior<T> extends NetPageBehavior {
             }
         }
 
-        protected String readCacheData(String url, CacheParameter parameter) {
+        protected String readCacheData(String url, BaseFragment.CacheParameter parameter) {
             if (parameter == null || TextUtils.isEmpty(parameter.getCachePath())) {
                 return null;
             }
@@ -147,7 +147,7 @@ public abstract class LibraryPageBehavior<T> extends NetPageBehavior {
             return bytes == null ? null : new String(bytes);
         }
 
-        protected void saveData(String url, String data, CacheParameter parameter) {
+        protected void saveData(String url, String data, BaseFragment.CacheParameter parameter) {
             if (parameter == null || TextUtils.isEmpty(parameter.getCachePath()) || parameter.getCacheMillis() <= 0) {
                 return;
             }
@@ -156,7 +156,7 @@ public abstract class LibraryPageBehavior<T> extends NetPageBehavior {
 
     }
 
-    public static class LibraryPageDecoder implements BaseFragment.Decoder {
+    private static class LibraryPageDecoder implements BaseFragment.Decoder {
 
         @Override
         public byte[] decode(byte[] bytes) {
