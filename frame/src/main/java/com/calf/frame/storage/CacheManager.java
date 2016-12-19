@@ -1,10 +1,9 @@
 package com.calf.frame.storage;
 
 import android.text.TextUtils;
-import android.util.Base64;
 
-import com.calf.frame.tool.Assert;
 import com.calf.frame.log.Logger;
+import com.calf.frame.tool.Assert;
 import com.calf.frame.utils.DateUtils;
 import com.calf.frame.utils.FileUtils;
 
@@ -280,10 +279,9 @@ public class CacheManager {
             dir = dir + SEPARATOR;
         }
         if (mSecondDirs.contains(dir)) {
-            dir = dir + Math.abs(key.hashCode()) % 30;
+            dir = dir + Math.abs(key.hashCode()) % 30 + SEPARATOR;
         }
-        String base64Key = Base64.encodeToString(key.getBytes(), Base64.DEFAULT);
-        return (dir + SEPARATOR + base64Key).trim();
+        return (dir + key.hashCode()).trim();
     }
 
 }

@@ -37,6 +37,7 @@ public abstract class LibraryPageBehavior<T> extends NetPageBehavior {
     public static class LibraryPageTask<T> extends BaseFragment.BaseTask {
 
         private String mUrl;
+        private boolean mUseCache;
         private CacheParameter mParameter;
         private Bundle mSavedInstanceState;
         private HttpPageStatistics mStatistics;
@@ -44,8 +45,13 @@ public abstract class LibraryPageBehavior<T> extends NetPageBehavior {
 
         public LibraryPageTask(String url, CacheParameter parameter, BaseFragment.Callback<T> callback) {
             this.mUrl = url;
+            this.mUseCache = true;
             this.mCallback = callback;
             this.mParameter = parameter;
+        }
+
+        public void setUseCache(boolean useCache) {
+            this.mUseCache = useCache;
         }
 
         public void setStatistics(HttpPageStatistics statistics) {
@@ -58,10 +64,13 @@ public abstract class LibraryPageBehavior<T> extends NetPageBehavior {
 
         @Override
         public void run() {
-            if (NetworkManager.isAvailable()) {
-                mCallback.onState(BaseFragment.State.LOADING, "LibraryPageTask loading");
-                String cacheData = readCacheDate(mUrl, mParameter);
-                if (TextUtils.isEmpty(cacheData)) {
+            mCallback.onState(BaseFragment.State.LOADING, "LibraryPageTask loading");
+            String cacheData = null;
+            if (mUseCache) {
+                cacheData = readCacheData(mUrl, mParameter);
+            }
+            if (TextUtils.isEmpty(cacheData)) {
+                if (NetworkManager.isAvailable()) {
                     long start = System.currentTimeMillis();
                     if (mStatistics != null) {
                         mStatistics.onHttpRequestStart(mUrl);
@@ -97,11 +106,12 @@ public abstract class LibraryPageBehavior<T> extends NetPageBehavior {
                         mCallback.onState(BaseFragment.State.FAILURE, error);
                     }
                 } else {
-                    dealData(cacheData, false);
+                    mCallback.onState(BaseFragment.State.NO_NET, "LibraryPageTask no net");
                 }
             } else {
-                mCallback.onState(BaseFragment.State.NO_NET, "LibraryPageTask no net");
+                dealData(cacheData, false);
             }
+            die();
         }
 
         private void dealData(String data, boolean isHttpDownload) {
@@ -123,12 +133,17 @@ public abstract class LibraryPageBehavior<T> extends NetPageBehavior {
             }
         }
 
-        protected String readCacheDate(String url, CacheParameter parameter) {
+        protected String readCacheData(String url, CacheParameter parameter) {
             if (parameter == null || TextUtils.isEmpty(parameter.getCachePath())) {
                 return null;
             }
             String dir = parameter.getCachePath();
-            byte[] bytes = CacheManager.getInstance().get(dir, url);
+            byte[] bytes = null;
+            if (NetworkManager.isAvailable()) {
+                bytes = CacheManager.getInstance().get(dir, url);
+            } else {
+                bytes = CacheManager.getInstance().get(dir, url, true);
+            }
             return bytes == null ? null : new String(bytes);
         }
 
