@@ -17,7 +17,7 @@ public class UrlFactory {
         return sb;
     }
 
-    public static String createAlbumMusic(int id, int start, int count) {
+    public static String createAlbumMusic(long id, int start, int count) {
         StringBuilder sb = createCommonParams();
         sb.append("&id=").append(id);
         sb.append("&start=").append(start);
@@ -26,6 +26,12 @@ public class UrlFactory {
         return HOST + encryptParams(sb.toString());
     }
 
+    public static String createConvertUrl(long id){
+        StringBuilder sb = createCommonParams();
+        sb.append("&rid=").append(id);
+        sb.append("&type=convert_url2&&br=128kmp3&format=aac|mp3|flac&sig=0&network=WIFI");
+        return HOST + encryptParams(sb.toString());
+    }
     private static String encryptParams(String str) {
         return encryptParams(str.getBytes());
     }
