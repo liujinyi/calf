@@ -50,10 +50,10 @@ public class LibraryMainFragment extends BaseFragment<String> {
 
             @Override
             protected String giveMeUrl(int start, int count) {
-                return UrlFactory.createLibraryMainUrl(count);
+                return UrlFactory.createAlbumMusic(574, start, count);
             }
         };
-        behavior.getCacheParameter().setDecoder(null);
+        //behavior.getCacheParameter().setDecoder(null);
         return behavior;
     }
 
