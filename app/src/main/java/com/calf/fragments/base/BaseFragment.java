@@ -421,7 +421,7 @@ public abstract class BaseFragment<T> extends Fragment {
     }
 
     protected interface BackgroundParser<T> {
-        T onBackgroundParser(String data);
+        T onBackgroundParser(String data) throws Exception;
     }
 
     interface Callback<T> {
