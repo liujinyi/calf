@@ -24,7 +24,6 @@ public final class DES {
 
     private static final int g_arrayLs[] = {1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1};
     private static final long g_arrayLsMask[] = {0x0000000000000000l, 0x0000000000100001l, 0x0000000000300003l};
-    public static final byte[] SECRET_KEY = "ylzsxkwm".getBytes();
 
     private static long BitTransform(int[] array, int len, long source) {
         long bts = source;
