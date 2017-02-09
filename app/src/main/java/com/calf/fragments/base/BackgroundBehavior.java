@@ -3,69 +3,80 @@ package com.calf.fragments.base;
 import android.os.Bundle;
 
 import com.calf.frame.log.Logger;
-import com.calf.player.manager.NetworkManager;
 
 /**
  * Created by JinYi Liu on 16-12-3.
  */
 
-public abstract class BackgroundBehavior<T> extends BaseFragment.Behavior {
+public abstract class BackgroundBehavior<T> implements BaseFragment.Behavior<T> {
 
-    protected boolean mUseNetCallback;
     private BackgroundTask mBackgroundTask;
-    private BaseFragment.State mCurrentState;
 
-    protected abstract T onBackgroundLoading() throws Exception;
+    protected abstract T onBackgroundLoading(Bundle savedInstanceState) throws Exception;
 
-    public void useNetCallback() {
-        this.mUseNetCallback = true;
+    protected void showStateView(BaseFragment.State state) {
+        String message = "";
+        switch (state) {
+            case LOADING:
+                message = "BackgroundBehavior start loading";
+                break;
+            case FAILURE:
+                message = "BackgroundBehavior failure";
+                break;
+            case NO_NET:
+                message = "BackgroundBehavior no net";
+                break;
+            default:
+                break;
+        }
+        showStateView(state, message);
     }
 
-    protected void handlerStateCallback(BaseFragment.Callback<T> callback) {
-        if (mUseNetCallback) {
-            if (NetworkManager.isAvailable()) {
-                callback.onState(BaseFragment.State.LOADING, "BackgroundBehavior begin loading");
-                mCurrentState = BaseFragment.State.LOADING;
-            } else {
-                callback.onState(BaseFragment.State.NO_NET, "BackgroundBehavior no net");
-                mCurrentState = BaseFragment.State.NO_NET;
-            }
-        } else {
-            callback.onState(BaseFragment.State.LOADING, "BackgroundBehavior begin loading");
-            mCurrentState = BaseFragment.State.LOADING;
-        }
+    protected void showStateView(BaseFragment.State state, String message) {
+        mBackgroundTask.getCallback().onState(state, message);
     }
 
     @Override
-    protected void doInBackground(Bundle savedInstanceState) {
+    public final void doInBackground(Bundle savedInstanceState, BaseFragment.Callback<T> callback) {
         if (mBackgroundTask != null && !mBackgroundTask.isCancelOrDie()) {
             // is in background loading
             Logger.e(BaseFragment.TAG, "BackgroundBehavior [doInBackground] mBackgroundTask is loading");
         } else {
-            mBackgroundTask = new BackgroundTask(savedInstanceState);
+            mBackgroundTask = new BackgroundTask(savedInstanceState, callback, this);
             new Thread(mBackgroundTask).start();
         }
     }
 
-    private class BackgroundTask extends BaseFragment.BaseTask {
+    private static class BackgroundTask<T> extends BaseFragment.BaseTask {
 
         private Bundle mSavedInstanceState;
+        private BackgroundBehavior<T> mBehavior;
+        private BaseFragment.Callback<T> mCallback;
 
-        public BackgroundTask(Bundle savedInstanceState) {
+        public BackgroundTask(Bundle savedInstanceState, BaseFragment.Callback<T> callback, BackgroundBehavior<T> behavior) {
+            this.mBehavior = behavior;
+            this.mCallback = callback;
             this.mSavedInstanceState = savedInstanceState;
+        }
+
+        BaseFragment.Callback<T> getCallback() {
+            return mCallback;
         }
 
         @Override
         public void run() {
             try {
-                handlerStateCallback(getCallback());
-                if (mCurrentState == BaseFragment.State.LOADING) {
-                    getCallback().onSuccess(onBackgroundLoading(), mSavedInstanceState);
+                mBehavior.showStateView(BaseFragment.State.LOADING);
+                T t = mBehavior.onBackgroundLoading(mSavedInstanceState);
+                if (t == null) {
+                    mCallback.onState(BaseFragment.State.FAILURE, "onBackgroundLoading can't return null");
+                } else {
+                    mCallback.onSuccess(mSavedInstanceState, t);
                 }
                 die();
             } catch (Exception e) {
                 Logger.printStackTrace(e);
-                getCallback().onState(BaseFragment.State.FAILURE, e.getMessage());
+                mCallback.onState(BaseFragment.State.FAILURE, e.getMessage());
             }
         }
     }
