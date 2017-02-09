@@ -42,14 +42,14 @@ public class MineMainFragment extends BaseFragment<String> {
 
     @Override
     protected Behavior<String> onBehaviorSetup() {
-        BackgroundBehavior behavior = new BackgroundBehavior() {
+        BackgroundBehavior<String> behavior = new BackgroundBehavior<String>() {
             @Override
-            protected String onBackgroundLoading() throws Exception {
+            protected String onBackgroundLoading(Bundle savedInstanceState) throws Exception {
+
                 Thread.sleep(1000);
                 return "我的详情页,来自本地行为";
             }
         };
-        behavior.useNetCallback();
         setLoadingContent("本地加载中...");
         return behavior;
     }

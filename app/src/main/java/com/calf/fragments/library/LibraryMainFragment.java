@@ -6,7 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.calf.fragments.base.BaseFragment;
-import com.calf.fragments.base.LibraryPageBehavior;
+import com.calf.fragments.base.HttpBehavior;
 import com.calf.player.R;
 import com.calf.utils.UrlFactory;
 
@@ -42,9 +42,9 @@ public class LibraryMainFragment extends BaseFragment<String> {
 
     @Override
     protected Behavior<String> onBehaviorSetup() {
-        LibraryPageBehavior<String> behavior = new LibraryPageBehavior() {
+        HttpBehavior<String> behavior = new HttpBehavior() {
             @Override
-            protected String onBackgroundParser(String data) {
+            public String onBackgroundParser(String data) {
                 return data;
             }
 
@@ -53,7 +53,8 @@ public class LibraryMainFragment extends BaseFragment<String> {
                 return UrlFactory.createLibraryMainUrl(count);
             }
         };
-        behavior.setDecoder(null);
+        behavior.getCacheParameter().setDecoder(null);
         return behavior;
     }
+
 }

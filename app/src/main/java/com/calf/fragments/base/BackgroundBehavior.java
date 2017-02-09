@@ -14,7 +14,7 @@ public abstract class BackgroundBehavior<T> implements BaseFragment.Behavior<T> 
 
     protected abstract T onBackgroundLoading(Bundle savedInstanceState) throws Exception;
 
-    protected void showStateView(BaseFragment.State state) {
+    private void showStateView(BaseFragment.State state) {
         String message = "";
         switch (state) {
             case LOADING:
@@ -32,7 +32,7 @@ public abstract class BackgroundBehavior<T> implements BaseFragment.Behavior<T> 
         showStateView(state, message);
     }
 
-    protected void showStateView(BaseFragment.State state, String message) {
+    private void showStateView(BaseFragment.State state, String message) {
         mBackgroundTask.getCallback().onState(state, message);
     }
 

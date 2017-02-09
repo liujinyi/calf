@@ -67,14 +67,6 @@ public abstract class BaseFragment<T> extends Fragment {
         this.mSavedInstanceState = savedInstanceState;
         if (mBehavior != null) {
             mCallback = new Callback<T>() {
-//                @Override
-//                public T onBackgroundParser(String data) throws Exception {
-//                    if (mBehavior instanceof NetPageBehavior) {
-//                        return (T) ((NetPageBehavior) mBehavior).onBackgroundParser(data);
-//                    }
-//                    return null;
-//                }
-
                 @Override
                 public void onState(State state, String message) {
                     showStateView(state, message);
@@ -428,99 +420,42 @@ public abstract class BaseFragment<T> extends Fragment {
         INIT, LOADING, FAILURE, NO_NET
     }
 
-    protected interface IHttpBehavior<T> {
+    protected interface BackgroundParser<T> {
         public T onBackgroundParser(String data);
-
-        public String giveMeUrl(int start, int count);
     }
 
     interface Callback<T> {
-        //T onBackgroundParser(String data) throws Exception;
-
         void onState(State state, String message);
 
         void onSuccess(Bundle savedInstanceState, T t);
     }
 
-    protected interface Decoder {
+    interface Decoder {
         byte[] decode(byte[] bytes);
     }
 
-    public interface HttpPageStatistics {
-        public void onHttpRequestStart(String url);
+    protected interface HttpRequestStatistics {
+        void onHttpRequestStart(String url);
 
-        public void onHttpRequestFailure(String url, long cost, Response response);
+        void onHttpRequestFailure(String url, long cost, Response response);
 
-        public void onHttpRequestSuccess(String url, long cost, Response response);
+        void onHttpRequestSuccess(String url, long cost, Response response);
     }
 
-    interface Behavior<T> {
+    protected interface Behavior<T> {
         void doInBackground(Bundle savedInstanceState, Callback<T> callback);
     }
-
-//    protected static abstract class NetPageBehavior<T> implements Behavior {
-//
-//        private CacheParameter mParameter;
-//        private BaseFragment.BaseTask mPageTask;
-//        private HttpPageStatistics mHttpPageStatistics;
-//
-//        public NetPageBehavior() {
-//            this.mParameter = new CacheParameter();
-//        }
-//
-//        protected abstract T onBackgroundParser(String data);
-//
-//        protected abstract String giveMeUrl(int start, int count);
-//
-//        @Override
-//        public void doInBackground(Bundle savedInstanceState, Callback<T> callback) {
-//            String url = giveMeUrl(0, 30);
-//            BaseFragment.Callback callback = getCallback();
-//            if (TextUtils.isEmpty(url)) {
-//                callback.onState(BaseFragment.State.FAILURE, "NetPageBehavior [giveMeUrl] isEmpty");
-//                return;
-//            }
-//            if (mPageTask != null && !mPageTask.isCancelOrDie()) {
-//                Logger.e(BaseFragment.TAG, "NetPageBehavior [doInBackground] mPageTask is loading");
-//            } else {
-//                mPageTask = null;
-//                mPageTask = createPageTask(savedInstanceState, url);
-//                new Thread(mPageTask).start();
-//            }
-//        }
-//
-//        protected abstract BaseFragment.BaseTask createPageTask(Bundle savedInstanceState, String url);
-//
-//        public CacheParameter getParameter() {
-//            return mParameter;
-//        }
-//
-//        public void setHttpPageStatistics(HttpPageStatistics mHttpPageStatistics) {
-//            this.mHttpPageStatistics = mHttpPageStatistics;
-//        }
-//
-//        public HttpPageStatistics getHttpPageStatistics() {
-//            return mHttpPageStatistics;
-//        }
-//
-//        public void setCachePath(String path) {
-//            this.mParameter.setCachePath(path);
-//        }
-//
-//        public void setCacheMillis(long millis) {
-//            this.mParameter.setCacheMillis(millis);
-//        }
-//
-//        public void setDecoder(BaseFragment.Decoder decoder) {
-//            this.mParameter.setDecoder(decoder);
-//        }
-//
-//    }
 
     protected static class CacheParameter {
         private long mCacheMillis;
         private String mCachePath;
         private BaseFragment.Decoder mDecoder;
+
+        public CacheParameter(long cacheMillis, String cachePath, Decoder decoder) {
+            this.mDecoder = decoder;
+            this.mCachePath = cachePath;
+            this.mCacheMillis = cacheMillis;
+        }
 
         public long getCacheMillis() {
             return mCacheMillis;
