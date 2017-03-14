@@ -28,6 +28,11 @@
             android:name=".activitys.SingleTopActivity"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <service
+            android:name=".services.PlaybackService"
+            android:process=":support" />
+
     </application>
 
 </manifest>

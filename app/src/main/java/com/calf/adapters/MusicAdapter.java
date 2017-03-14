@@ -1,25 +1,17 @@
 package com.calf.adapters;
 
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.calf.bean.MusicInfo;
-import com.calf.frame.http.HttpSession;
-import com.calf.frame.log.Logger;
-import com.calf.frame.message.MessageManager;
+import com.calf.mode.ModeMgr;
+import com.calf.mode.PlaybackMgr;
 import com.calf.player.R;
-import com.calf.utils.UrlFactory;
 
-import java.io.IOException;
 import java.util.List;
-
-import okhttp3.Response;
 
 /**
  * Created by JinYi Liu on 2017/2/9.
@@ -27,12 +19,10 @@ import okhttp3.Response;
 
 public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> {
 
-    private MediaPlayer mMediaPlayer;
     private List<MusicInfo> mMusicInfos;
 
     public MusicAdapter(List<MusicInfo> onlineInfos) {
         this.mMusicInfos = onlineInfos;
-        this.mMediaPlayer = new MediaPlayer();
     }
 
     @Override
@@ -53,27 +43,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        HttpSession session = new HttpSession();
-                        Response response = session.get(UrlFactory.createConvertUrl(musicInfo.getId()));
-                        if (response != null && response.isSuccessful()) {
-                            try {
-                                final String data = response.body().string();
-                                String url = data.split("\r\n")[2].substring(4);
-                                mMediaPlayer.reset();
-                                mMediaPlayer.setDataSource(url);
-                                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                                mMediaPlayer.prepare();
-                                mMediaPlayer.start();
-                                MessageManager.asyncPost(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(holder.mRootView.getContext(), data, Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                            } catch (IOException e) {
-                                Logger.printStackTrace(e);
-                            }
-                        }
+                        ModeMgr.getMode(PlaybackMgr.class).play(musicInfo);
                     }
                 }).start();
             }
@@ -99,6 +69,5 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
         public TextView mTitleTextView;
 
     }
-
 
 }

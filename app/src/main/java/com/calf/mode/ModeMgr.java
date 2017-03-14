@@ -29,6 +29,7 @@ public final class ModeMgr {
         } else {
             try {
                 mode = cls.newInstance();
+                mode.init();
                 mModes.put(cls, mode);
             } catch (Exception e) {
                 Assert.classAssert(false, e.getMessage());

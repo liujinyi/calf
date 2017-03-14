@@ -1,7 +1,11 @@
 package com.calf.player.activitys;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
@@ -11,6 +15,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.calf.adapters.MainActivityTabAdapter;
 import com.calf.fragments.base.BaseFragment;
@@ -19,8 +24,19 @@ import com.calf.frame.log.Logger;
 import com.calf.player.Init;
 import com.calf.player.R;
 import com.calf.player.manager.MainFragmentManager;
+import com.calf.player.services.IPlayDelegate;
+import com.calf.player.services.IPlaybackService;
+import com.calf.player.services.PlaybackService;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    public static IPlaybackService mBinder;
+    private IPlayDelegate mDelegate = new IPlayDelegate.Stub() {
+        @Override
+        public void onPlay() {
+            Logger.e("calf",  "MainActivity PlayCallback [onPlay]");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +65,28 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
+        ServiceConnection conn = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Logger.e("swallow", "MainActivity [onServiceConnected]");
+                Toast.makeText(getApplicationContext(), "connect success", Toast.LENGTH_SHORT).show();
+                mBinder = (IPlaybackService) IPlaybackService.Stub.asInterface(service);
+                try {
+                    mBinder.setPlayDelegate(mDelegate);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
 
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Logger.e("swallow", "MainActivity [onServiceDisconnected]");
+            }
+        };
+        Intent intent = new Intent(this, PlaybackService.class);
+        bindService(intent, conn, BIND_AUTO_CREATE);
+        startService(intent);
+        //bindService(intent);
     }
 
     @Override
