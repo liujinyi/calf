@@ -43,7 +43,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        ModeMgr.getMode(PlaybackMgr.class).play(musicInfo);
+                        ModeMgr.getPlaybackMgr().play(musicInfo);
                     }
                 }).start();
             }

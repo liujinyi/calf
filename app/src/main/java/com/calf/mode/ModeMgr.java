@@ -4,7 +4,7 @@ import android.support.v4.util.ArrayMap;
 
 import com.calf.frame.log.Logger;
 import com.calf.frame.tool.Assert;
-import com.calf.player.manager.MainFragmentManager;
+import com.calf.player.activitys.MainActivity;
 
 /**
  * Created by JinYi Liu on 16-11-13.
@@ -12,25 +12,30 @@ import com.calf.player.manager.MainFragmentManager;
 
 public final class ModeMgr {
 
-    private static ArrayMap<Class<? extends Mode>, Mode> mModes = new ArrayMap<>();
+    private static MainActivity sActivity;
+    private static ArrayMap<Class<? extends Mode>, Mode> sModes = new ArrayMap<>();
 
-    static {
-
+    public static void init(MainActivity activity) {
+        sActivity = activity;
     }
 
-    public static <T extends Mode> T getMode(Class<T> cls) {
-        return createManager(cls);
+    public static PlaybackMgr getPlaybackMgr(){
+        return loadMode(PlaybackMgr.class);
     }
 
-    private static <T extends Mode> T createManager(Class<T> cls) {
+    public static <T extends Mode> T loadMode(Class<T> cls) {
+        return getMode(cls);
+    }
+
+    private static <T extends Mode> T getMode(Class<T> cls) {
         T mode = null;
-        if (mModes.containsKey(cls)) {
-            mode = (T) mModes.get(cls);
+        if (sModes.containsKey(cls)) {
+            mode = (T) sModes.get(cls);
         } else {
             try {
                 mode = cls.newInstance();
-                mode.init();
-                mModes.put(cls, mode);
+                mode.init(sActivity);
+                sModes.put(cls, mode);
             } catch (Exception e) {
                 Assert.classAssert(false, e.getMessage());
                 Logger.printStackTrace(e);
