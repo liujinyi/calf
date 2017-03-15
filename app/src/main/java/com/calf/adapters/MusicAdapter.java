@@ -40,12 +40,7 @@ public class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.ViewHolder> 
         holder.mRootView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ModeMgr.getPlaybackMgr().play(musicInfo);
-                    }
-                }).start();
+                ModeMgr.getPlaybackMgr().play(musicInfo);
             }
         });
     }

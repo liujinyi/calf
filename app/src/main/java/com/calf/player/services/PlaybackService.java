@@ -37,23 +37,28 @@ public class PlaybackService extends Service{
         this.mBinder = new IPlaybackService.Stub() {
 
             @Override
-            public void play(MusicInfo musicInfo) throws RemoteException {
-                HttpSession session = new HttpSession();
-                Response response = session.get(UrlFactory.createConvertUrl(musicInfo.getId()));
-                if (response != null && response.isSuccessful()) {
-                    try {
-                        final String data = response.body().string();
-                        String url = data.split("\r\n")[2].substring(4);
-                        mMediaPlayer.reset();
-                        mMediaPlayer.setDataSource(url);
-                        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        mMediaPlayer.prepare();
-                        mMediaPlayer.start();
-                        mPlayDelegate.onPlay();
-                    } catch (IOException e) {
-                        Logger.printStackTrace(e);
+            public void play(final MusicInfo musicInfo) throws RemoteException {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        HttpSession session = new HttpSession();
+                        Response response = session.get(UrlFactory.createConvertUrl(musicInfo.getId()));
+                        if (response != null && response.isSuccessful()) {
+                            try {
+                                final String data = response.body().string();
+                                String url = data.split("\r\n")[2].substring(4);
+                                mMediaPlayer.reset();
+                                mMediaPlayer.setDataSource(url);
+                                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                                mMediaPlayer.prepare();
+                                mMediaPlayer.start();
+                                mPlayDelegate.onPlay();
+                            } catch (Exception e) {
+                                Logger.printStackTrace(e);
+                            }
+                        }
                     }
-                }
+                }).start();
             }
 
             @Override
